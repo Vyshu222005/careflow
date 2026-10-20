@@ -41,6 +41,7 @@ python -m venv .venv
 .venv\Scripts\activate        # Windows
 pip install -r requirements.txt
 python src/download_data.py   # fetches the Sepsis event log into data/raw/
+python src/load_data.py       # loads the log and prints its shape and sample rows
 ```
 
 ## Dataset
@@ -49,7 +50,8 @@ Sepsis Cases - Event Log (4TU.ResearchData, DOI 10.4121/uuid:915d2bfb-7e84-49ad-
 ## Status
 - [x] Project scaffold
 - [x] Dataset and data dictionary
-- [ ] Data loading and cleaning
+- [x] Data loading ([src/load_data.py](src/load_data.py), [notebook](notebooks/01_load_data.ipynb))
+- [ ] Data cleaning
 - [ ] EDA, variant analysis, process discovery
 - [ ] Bottleneck analysis
 - [ ] Conformance checking, dashboard, final report

@@ -73,4 +73,10 @@ These values are recorded on events and describe the patient or clinical state.
 - Some cases are very short or very long and may need filtering.
 - Rare activities may be treated as noise during discovery.
 
-> Column names and types are taken from the dataset documentation and will be verified against the loaded data in the loading step.
+## Verification (from `notebooks/01_load_data.ipynb`)
+The loaded log was checked against this dictionary:
+- 15,214 events, 1,050 cases, 16 activities, 32 columns. All column names match the tables above.
+- Events span 2013-11-07 to 2015-06-05.
+- `org:group` contains anonymised department codes (A, B, C, ...), not department names.
+- About 93% of events have empty case attributes (Age, diagnostic flags, SIRS criteria, and similar). They are recorded only on some events. `Diagnose` is about 95% empty, `CRP` and `Leucocytes` about 79%, and `LacticAcid` about 90%.
+- The boolean attribute columns load as `object` dtype and need converting during cleaning.
