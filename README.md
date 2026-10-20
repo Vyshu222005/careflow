@@ -40,11 +40,15 @@ careflow/
 python -m venv .venv
 .venv\Scripts\activate        # Windows
 pip install -r requirements.txt
+python src/download_data.py   # fetches the Sepsis event log into data/raw/
 ```
+
+## Dataset
+Sepsis Cases - Event Log (4TU.ResearchData, DOI 10.4121/uuid:915d2bfb-7e84-49ad-a286-dc35f063a460). See [docs/data_dictionary.md](docs/data_dictionary.md) for columns and the case/activity/timestamp mapping.
 
 ## Status
 - [x] Project scaffold
-- [ ] Dataset and data dictionary
+- [x] Dataset and data dictionary
 - [ ] Data loading and cleaning
 - [ ] EDA, variant analysis, process discovery
 - [ ] Bottleneck analysis
