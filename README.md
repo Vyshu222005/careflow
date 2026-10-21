@@ -42,7 +42,10 @@ python -m venv .venv
 pip install -r requirements.txt
 python src/download_data.py   # fetches the Sepsis event log into data/raw/
 python src/load_data.py       # loads the log and prints its shape and sample rows
+python src/clean_data.py      # cleans the log, writes data/processed/sepsis_clean.csv and the quality report
 ```
+
+Read the cleaned file with `load_clean_log()` from `src/clean_data.py`. One case ID is literally `NA`, which a plain `pd.read_csv` would turn into a missing value.
 
 ## Dataset
 Sepsis Cases - Event Log (4TU.ResearchData, DOI 10.4121/uuid:915d2bfb-7e84-49ad-a286-dc35f063a460). See [docs/data_dictionary.md](docs/data_dictionary.md) for columns and the case/activity/timestamp mapping.
@@ -51,7 +54,7 @@ Sepsis Cases - Event Log (4TU.ResearchData, DOI 10.4121/uuid:915d2bfb-7e84-49ad-
 - [x] Project scaffold
 - [x] Dataset and data dictionary
 - [x] Data loading ([src/load_data.py](src/load_data.py), [notebook](notebooks/01_load_data.ipynb))
-- [ ] Data cleaning
+- [x] Data cleaning ([src/clean_data.py](src/clean_data.py), [quality report](reports/data_quality_report.md))
 - [ ] EDA, variant analysis, process discovery
 - [ ] Bottleneck analysis
 - [ ] Conformance checking, dashboard, final report
