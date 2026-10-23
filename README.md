@@ -44,6 +44,7 @@ python src/download_data.py   # fetches the Sepsis event log into data/raw/
 python src/load_data.py       # loads the log and prints its shape and sample rows
 python src/clean_data.py      # cleans the log, writes data/processed/sepsis_clean.csv and the quality report
 python src/prepare_log.py     # filters rare activities, adds features, writes sepsis_events.csv and sepsis_cases.csv
+python src/variants.py        # counts pathway variants, writes reports/top_variants.csv
 ```
 
 Read the processed files with `load_clean_log()` (`src/clean_data.py`), `load_events()` and `load_cases()` (`src/prepare_log.py`). One case ID is literally `NA`, which a plain `pd.read_csv` would turn into a missing value.
@@ -58,6 +59,7 @@ Sepsis Cases - Event Log (4TU.ResearchData, DOI 10.4121/uuid:915d2bfb-7e84-49ad-
 - [x] Data cleaning ([src/clean_data.py](src/clean_data.py), [quality report](reports/data_quality_report.md))
 - [x] Exploratory data analysis ([notebook](notebooks/02_eda.ipynb), charts in [reports/figures](reports/figures))
 - [x] Event log preparation ([src/prepare_log.py](src/prepare_log.py), [report](reports/event_log_preparation.md))
-- [ ] Variant analysis, process discovery
+- [x] Variant analysis ([src/variants.py](src/variants.py), [notebook](notebooks/03_variants.ipynb), [top variants](reports/top_variants.csv))
+- [ ] Process discovery
 - [ ] Bottleneck analysis
 - [ ] Conformance checking, dashboard, final report

@@ -1,0 +1,41 @@
+level,rank,variant,cases,share_pct,cumulative_pct,median_duration_days,steps
+exact,1,ER Registration > ER Triage > ER Sepsis Triage > Leucocytes > CRP,46,4.62,4.62,0.02,5
+exact,2,ER Registration > ER Triage > ER Sepsis Triage > Leucocytes > CRP > LacticAcid > IV Liquid > IV Antibiotics,41,4.12,8.74,0.12,8
+exact,3,ER Registration > ER Triage > ER Sepsis Triage,35,3.52,12.26,0.01,3
+exact,4,ER Registration > ER Triage > ER Sepsis Triage > Leucocytes > CRP > LacticAcid,21,2.11,14.37,0.02,6
+exact,5,ER Registration > ER Triage > ER Sepsis Triage > Leucocytes > CRP > LacticAcid > IV Liquid > IV Antibiotics > Admission NC > Leucocytes > CRP > Release A,18,1.81,16.18,3.53,12
+exact,6,ER Registration > ER Triage > ER Sepsis Triage > Leucocytes > CRP > LacticAcid > IV Liquid > IV Antibiotics > Admission NC > Leucocytes > CRP > Leucocytes > CRP > Release A,13,1.31,17.49,5.49,14
+exact,7,ER Registration > ER Triage > ER Sepsis Triage > Leucocytes > CRP > LacticAcid > IV Liquid > IV Antibiotics > Admission NC > Release A,13,1.31,18.79,2.96,10
+exact,8,ER Registration > ER Triage > ER Sepsis Triage > Leucocytes > CRP > LacticAcid > IV Liquid > IV Antibiotics > Admission NC > Leucocytes > CRP > Release A > Return ER,12,1.21,20.0,43.93,13
+exact,9,ER Registration > ER Triage > Leucocytes > CRP > LacticAcid > ER Sepsis Triage > IV Liquid > IV Antibiotics,12,1.21,21.21,0.1,8
+exact,10,ER Registration > ER Triage > ER Sepsis Triage > IV Liquid > IV Antibiotics > Leucocytes > CRP > LacticAcid,10,1.01,22.21,0.02,8
+exact,11,ER Registration > ER Triage > ER Sepsis Triage > IV Liquid > Leucocytes > CRP > LacticAcid > IV Antibiotics,10,1.01,23.22,0.06,8
+exact,12,ER Registration > ER Triage > ER Sepsis Triage > Leucocytes > CRP > LacticAcid > IV Liquid > IV Antibiotics > Admission NC > Leucocytes > CRP > Admission NC > Leucocytes > CRP > Release A,10,1.01,24.22,4.87,15
+exact,13,ER Registration > ER Triage > ER Sepsis Triage > Leucocytes > CRP > Admission NC > Release A,9,0.9,25.13,3.17,7
+exact,14,ER Registration > ER Triage > Leucocytes > CRP > ER Sepsis Triage,9,0.9,26.03,0.04,5
+exact,15,ER Registration > ER Triage > ER Sepsis Triage > IV Liquid > IV Antibiotics > Leucocytes > CRP > LacticAcid > Admission NC > Leucocytes > CRP > Release A,7,0.7,26.73,4.1,12
+exact,16,ER Registration > ER Triage > ER Sepsis Triage > IV Liquid > Leucocytes > CRP > LacticAcid > IV Antibiotics > Admission NC > Admission NC > Leucocytes > CRP > Release A,6,0.6,27.34,4.99,13
+exact,17,ER Registration > ER Triage > ER Sepsis Triage > Leucocytes > CRP > LacticAcid > IV Liquid > IV Antibiotics > Admission NC > Admission NC > Leucocytes > CRP > Release A,6,0.6,27.94,3.76,13
+exact,18,ER Registration > ER Triage > ER Sepsis Triage > Leucocytes > CRP > LacticAcid > IV Liquid > IV Antibiotics > Admission NC > CRP > Release A > Return ER,6,0.6,28.54,114.92,12
+exact,19,ER Registration > ER Triage > ER Sepsis Triage > Leucocytes > CRP > LacticAcid > IV Liquid > IV Antibiotics > Admission NC > Leucocytes > CRP > Leucocytes > CRP > Release A > Return ER,6,0.6,29.15,141.85,15
+exact,20,ER Registration > ER Triage > ER Sepsis Triage > IV Liquid > IV Antibiotics > Leucocytes > CRP > LacticAcid > Admission NC > Leucocytes > CRP > Release A > Return ER,5,0.5,29.65,76.76,13
+milestone,1,ER Registration > ER Triage > ER Sepsis Triage > IV Liquid > IV Antibiotics > Admission NC > Release A,224,22.51,22.51,5.14,7
+milestone,2,ER Registration > ER Triage > ER Sepsis Triage > IV Liquid > IV Antibiotics > Admission NC > Release A > Return ER,151,15.18,37.69,45.89,8
+milestone,3,ER Registration > ER Triage > ER Sepsis Triage,118,11.86,49.55,0.02,3
+milestone,4,ER Registration > ER Triage > ER Sepsis Triage > IV Liquid > IV Antibiotics,87,8.74,58.29,0.11,5
+milestone,5,ER Registration > ER Triage > ER Sepsis Triage > Admission NC > Release A,46,4.62,62.91,3.82,5
+milestone,6,ER Registration > ER Triage > ER Sepsis Triage > Admission NC > Release A > Return ER,26,2.61,65.53,61.39,6
+milestone,7,ER Registration > ER Triage > ER Sepsis Triage > IV Antibiotics > Admission NC > Release A,24,2.41,67.94,4.32,6
+milestone,8,ER Registration > ER Triage > ER Sepsis Triage > IV Liquid > IV Antibiotics > Admission NC > Release B,20,2.01,69.95,5.98,7
+milestone,9,ER Registration > ER Triage > ER Sepsis Triage > IV Liquid > IV Antibiotics > Admission IC > Admission NC > Release A,18,1.81,71.76,6.29,8
+milestone,10,ER Registration > ER Triage > ER Sepsis Triage > IV Liquid > IV Antibiotics > Admission IC > Admission NC > Release A > Return ER,17,1.71,73.47,82.51,9
+milestone,11,ER Registration > ER Triage > ER Sepsis Triage > IV Liquid > IV Antibiotics > Admission NC,17,1.71,75.18,0.2,6
+milestone,12,ER Registration > ER Triage > ER Sepsis Triage > IV Antibiotics > Admission NC > Release A > Return ER,16,1.61,76.78,42.11,7
+milestone,13,ER Registration > ER Triage > ER Sepsis Triage > IV Antibiotics > IV Liquid > Admission NC > Release A,13,1.31,78.09,4.14,7
+milestone,14,ER Registration > ER Triage > ER Sepsis Triage > IV Liquid > IV Antibiotics > Admission NC > Admission IC > Admission NC > Release A > Return ER,13,1.31,79.4,69.51,10
+milestone,15,ER Registration > IV Liquid > ER Triage > ER Sepsis Triage > IV Antibiotics > Admission NC > Release A,11,1.11,80.5,5.04,7
+milestone,16,ER Registration > ER Triage > ER Sepsis Triage > IV Antibiotics,10,1.01,81.51,0.1,4
+milestone,17,ER Registration > ER Triage > ER Sepsis Triage > IV Antibiotics > IV Liquid > Admission NC > Release A > Return ER,9,0.9,82.41,54.23,8
+milestone,18,ER Registration > ER Triage > ER Sepsis Triage > IV Liquid > IV Antibiotics > Admission NC > Release C,9,0.9,83.32,12.6,7
+milestone,19,ER Registration > ER Triage > ER Sepsis Triage > IV Liquid > IV Antibiotics > Admission NC > Release D,9,0.9,84.22,8.39,7
+milestone,20,ER Registration > ER Triage > ER Sepsis Triage > Admission NC > Release B,8,0.8,85.03,2.25,5
