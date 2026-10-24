@@ -46,6 +46,7 @@ python src/clean_data.py      # cleans the log, writes data/processed/sepsis_cle
 python src/prepare_log.py     # filters rare activities, adds features, writes sepsis_events.csv and sepsis_cases.csv
 python src/variants.py        # counts pathway variants, writes reports/top_variants.csv
 python src/discovery.py       # draws the process maps into reports/figures and scores the models
+python src/bottlenecks.py     # waiting times: writes reports/bottleneck_transitions.csv and the performance map
 ```
 
 Drawing the process maps needs the Graphviz program (the `graphviz` pip package is only a wrapper):
@@ -68,5 +69,6 @@ Sepsis Cases - Event Log (4TU.ResearchData, DOI 10.4121/uuid:915d2bfb-7e84-49ad-
 - [x] Event log preparation ([src/prepare_log.py](src/prepare_log.py), [report](reports/event_log_preparation.md))
 - [x] Variant analysis ([src/variants.py](src/variants.py), [notebook](notebooks/03_variants.ipynb), [top variants](reports/top_variants.csv))
 - [x] Process discovery ([src/discovery.py](src/discovery.py), [notebook](notebooks/04_process_discovery.ipynb), [model evaluation](reports/model_evaluation.csv))
-- [ ] Bottleneck analysis
-- [ ] Conformance checking, dashboard, final report
+- [x] Bottleneck analysis ([src/bottlenecks.py](src/bottlenecks.py), [notebook](notebooks/05_bottlenecks.ipynb), [transition table](reports/bottleneck_transitions.csv))
+- [ ] Basic dashboard
+- [ ] Conformance checking, final report

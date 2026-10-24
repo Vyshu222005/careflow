@@ -1,0 +1,50 @@
+from_step,to_step,cases,mean_hours,median_hours,p90_hours,total_hours,kind,share_of_hospital_time_pct
+ER Triage,ER Sepsis Triage,969,0.14,0.01,0.28,132.64,wait between steps,0.1
+ER Registration,ER Triage,962,0.18,0.14,0.39,177.43,wait between steps,0.13
+Admission NC,Release A,618,140.88,108.85,265.74,87065.23,time on ward,65.07
+IV Liquid,IV Antibiotics,610,0.48,0.0,2.0,294.27,wait between steps,0.22
+ER Sepsis Triage,IV Liquid,602,1.3,0.43,3.66,782.85,wait between steps,0.59
+IV Antibiotics,Admission NC,564,1.51,0.91,3.34,854.04,wait between steps,0.64
+Admission NC,Admission NC,320,40.63,17.57,87.91,13003.14,repeated ward record,9.72
+Release A,Return ER,262,1975.79,1116.49,5129.65,517656.58,return to ER,
+ER Sepsis Triage,IV Antibiotics,163,1.77,1.61,4.24,288.03,wait between steps,0.22
+ER Sepsis Triage,Admission NC,100,3.01,2.81,4.87,300.86,wait between steps,0.22
+Admission IC,Admission NC,85,73.58,40.7,145.29,6254.13,time in ICU,4.67
+IV Antibiotics,Admission IC,56,1.26,0.58,3.54,70.28,wait between steps,0.05
+IV Antibiotics,IV Liquid,41,3.05,0.33,17.92,125.2,wait between steps,0.09
+Admission NC,Release B,40,127.3,101.39,261.57,5092.0,time on ward,3.81
+IV Liquid,Admission NC,35,13.81,1.57,5.34,483.44,wait between steps,0.36
+Admission NC,Admission IC,32,25.91,11.7,64.95,829.16,time on ward,0.62
+Admission NC,IV Liquid,25,17.35,19.58,21.87,433.83,time on ward,0.32
+ER Registration,IV Liquid,25,0.13,0.08,0.23,3.29,wait between steps,0.0
+IV Liquid,ER Triage,23,0.08,0.08,0.16,1.9,wait between steps,0.0
+Admission NC,Release D,23,266.62,212.17,469.81,6132.25,time on ward,4.58
+Admission NC,Release C,20,358.14,307.24,624.4,7162.76,time on ward,5.35
+ER Triage,IV Liquid,17,0.66,0.5,1.09,11.19,wait between steps,0.01
+IV Liquid,Release A,14,94.51,83.83,126.75,1323.15,wait between steps,0.99
+IV Liquid,ER Sepsis Triage,12,0.98,0.38,2.25,11.76,wait between steps,0.01
+Release D,Return ER,10,1334.48,506.9,4027.35,13344.79,return to ER,
+ER Registration,ER Sepsis Triage,8,0.04,0.03,0.07,0.34,wait between steps,0.0
+Admission IC,Release B,7,143.78,34.25,364.03,1006.44,time in ICU,0.75
+ER Triage,Admission NC,7,3.43,3.19,4.81,24.04,wait between steps,0.02
+IV Antibiotics,ER Triage,6,0.1,0.04,0.26,0.61,wait between steps,0.0
+ER Sepsis Triage,Admission IC,6,2.55,2.68,3.39,15.33,wait between steps,0.01
+ER Sepsis Triage,ER Triage,6,0.26,0.15,0.55,1.55,wait between steps,0.0
+Admission NC,ER Sepsis Triage,5,1.93,0.06,5.66,9.63,time on ward,0.01
+Admission IC,Admission IC,5,95.98,20.99,257.79,479.89,time in ICU,0.36
+IV Antibiotics,Release A,5,144.96,121.46,254.47,724.8,wait between steps,0.54
+Release C,Return ER,5,1525.29,1158.12,3092.71,7626.44,return to ER,
+IV Liquid,Admission IC,3,2.03,2.2,2.34,6.08,wait between steps,0.0
+IV Liquid,Release B,2,115.42,115.42,193.82,230.85,wait between steps,0.17
+Admission NC,IV Antibiotics,2,4.3,4.3,7.72,8.6,time on ward,0.01
+Admission IC,Release A,1,86.64,86.64,86.64,86.64,time in ICU,0.06
+Admission IC,ER Sepsis Triage,1,0.01,0.01,0.01,0.01,time in ICU,0.0
+Admission IC,Return ER,1,2914.89,2914.89,2914.89,2914.89,time in ICU,
+Admission NC,ER Triage,1,31.55,31.55,31.55,31.55,time on ward,0.02
+Admission IC,IV Liquid,1,16.88,16.88,16.88,16.88,time in ICU,0.01
+ER Triage,Admission IC,1,3.27,3.27,3.27,3.27,wait between steps,0.0
+ER Triage,IV Antibiotics,1,0.58,0.58,0.58,0.58,wait between steps,0.0
+ER Triage,Release A,1,204.34,204.34,204.34,204.34,wait between steps,0.15
+IV Antibiotics,Release B,1,0.17,0.17,0.17,0.17,wait between steps,0.0
+IV Liquid,Release C,1,111.58,111.58,111.58,111.58,wait between steps,0.08
+Release B,Admission NC,1,0.22,0.22,0.22,0.22,wait between steps,0.0
