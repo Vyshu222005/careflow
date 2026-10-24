@@ -1,0 +1,5 @@
+model,log,fitness,perfectly_fitting_cases_pct,precision,f_score,places,transitions,arcs
+"Inductive miner, no noise filter",milestone,1.0,100.0,0.512,0.677,22,29,66
+"Inductive miner, noise 20%",milestone,0.916,60.6,0.649,0.76,18,24,54
+"Heuristics miner, dependency 0.8",milestone,0.93,15.0,0.937,0.933,23,36,83
+"Inductive miner, noise 20%",all activities,0.931,67.9,0.405,0.564,22,26,64
