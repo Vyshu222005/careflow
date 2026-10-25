@@ -57,6 +57,13 @@ winget install Graphviz.Graphviz
 
 Read the processed files with `load_clean_log()` (`src/clean_data.py`), `load_events()` and `load_cases()` (`src/prepare_log.py`). One case ID is literally `NA`, which a plain `pd.read_csv` would turn into a missing value.
 
+## Dashboard
+After running the pipeline above (at least `clean_data.py` and `prepare_log.py`), start the dashboard:
+```bash
+streamlit run app.py
+```
+It opens in the browser with five tabs: Overview, Pathways, Process map, Waiting times and About. The filters in the sidebar (registration dates, how the case ended, age group, returned to the ER) apply to every tab.
+
 ## Dataset
 Sepsis Cases - Event Log (4TU.ResearchData, DOI 10.4121/uuid:915d2bfb-7e84-49ad-a286-dc35f063a460). See [docs/data_dictionary.md](docs/data_dictionary.md) for columns and the case/activity/timestamp mapping.
 
@@ -70,5 +77,5 @@ Sepsis Cases - Event Log (4TU.ResearchData, DOI 10.4121/uuid:915d2bfb-7e84-49ad-
 - [x] Variant analysis ([src/variants.py](src/variants.py), [notebook](notebooks/03_variants.ipynb), [top variants](reports/top_variants.csv))
 - [x] Process discovery ([src/discovery.py](src/discovery.py), [notebook](notebooks/04_process_discovery.ipynb), [model evaluation](reports/model_evaluation.csv))
 - [x] Bottleneck analysis ([src/bottlenecks.py](src/bottlenecks.py), [notebook](notebooks/05_bottlenecks.ipynb), [transition table](reports/bottleneck_transitions.csv))
-- [ ] Basic dashboard
+- [x] Basic dashboard ([app.py](app.py)): `streamlit run app.py`
 - [ ] Conformance checking, final report

@@ -109,14 +109,23 @@ def target_summary(hours: pd.Series) -> dict:
     }
 
 
+def filtered_dfgs(steps: pd.DataFrame, path_share: float = DFG_PATH_SHARE):
+    """Frequency and performance DFGs with the same arrows (the `path_share` most frequent paths).
+
+    Returns (frequency, performance, start_activities, end_activities).
+    """
+    core = steps[[CASE_ID, ACTIVITY, TIMESTAMP]]  # pm4py shifts every column, so give it only the three it needs
+    frequency, start, end = pm4py.discover_dfg(core)
+    frequency, start, end = pm4py.filter_dfg_paths_percentage(frequency, start, end, percentage=path_share)
+    performance, _, _ = pm4py.discover_performance_dfg(core, perf_aggregation_key="all")
+    performance = {edge: stats for edge, stats in performance.items() if edge in frequency}
+    return frequency, performance, start, end
+
+
 def save_performance_map(steps: pd.DataFrame, path: Path = PERFORMANCE_MAP_PATH) -> None:
     """Process map with the median wait on each arrow (same arrows as the frequency map)."""
     ensure_graphviz()
-    core = steps[[CASE_ID, ACTIVITY, TIMESTAMP]]  # pm4py shifts every column, so give it only the three it needs
-    frequency, start, end = pm4py.discover_dfg(core)
-    keep, start, end = pm4py.filter_dfg_paths_percentage(frequency, start, end, percentage=DFG_PATH_SHARE)
-    performance, _, _ = pm4py.discover_performance_dfg(core, perf_aggregation_key="all")
-    performance = {edge: stats for edge, stats in performance.items() if edge in keep}
+    _, performance, start, end = filtered_dfgs(steps)
     path.parent.mkdir(parents=True, exist_ok=True)
     pm4py.save_vis_performance_dfg(
         performance, start, end, str(path), aggregation_measure="median",
