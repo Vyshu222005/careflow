@@ -1,81 +1,129 @@
 # CareFlow: Clinical Pathway Process Mining
 
+Process mining of real sepsis emergency-room data: which pathways patients actually follow, and where they wait.
 Data Analytics internship project at Infotact Solutions (Ref. ITS/DA/1370).
 
-## Problem Statement
-Hospitals record every step of a patient's journey (registration, tests, treatment, discharge), but rarely analyse how patients actually move through care. CareFlow applies **process mining** to hospital event logs to discover real clinical pathways, find delays and bottlenecks, and highlight deviations from the expected path.
+## Overview
+Hospitals record every step of a patient's journey (registration, tests, treatment, admission, discharge) but rarely study how patients really move through care. CareFlow applies **process mining** to a public hospital event log to:
 
-## Objectives
-1. Collect, clean and validate a clinical event log.
-2. Discover the actual patient pathways and the most common variants.
-3. Identify bottlenecks and slow transitions between care steps.
-4. Check conformance against an expected pathway and detect rework/loops.
-5. Present findings in an interactive dashboard and report.
+1. clean and validate the event log,
+2. discover the real patient pathways and how common each one is,
+3. find where patients wait (bottlenecks),
+4. present the results in an interactive dashboard.
 
-## Key Questions
-- What are the most common patient pathways?
-- Where do patients wait the longest?
-- Which cases deviate from the expected path, and why?
+Process mining needs three fields: a **case** (one patient's journey), an **activity** (one step) and a **timestamp**.
 
-## Planned Tech Stack
-Python, pandas, pm4py, matplotlib/plotly, Jupyter, Streamlit.
+## Key results
+Cleaned data: **995 patients, 14,208 events, 15 activities** (from 1,050 patients and 15,214 events in the raw log).
 
-## Project Structure
-```
-careflow/
-├── data/
-│   ├── raw/          # original event logs (not committed)
-│   └── processed/    # cleaned logs (not committed)
-├── notebooks/        # exploration and analysis notebooks
-├── src/              # reusable loading, cleaning and analysis code
-├── reports/
-│   └── figures/      # exported charts and process maps
-├── docs/             # data dictionary, summaries, documentation
-├── requirements.txt
-└── README.md
-```
+| Finding | Result |
+|---|---|
+| Typical case length | median 5.2 days; 26% finish within a day, 19% last over 30 days |
+| Pathway variety | 619 exact pathways (54% of patients follow one nobody else did), but only **96** once repeated lab tests are left out; the top 10 cover **73%** of patients |
+| Standard pathway | Registration, Triage, Sepsis triage, IV fluid, Antibiotics, Ward, Release A: 22.5% of patients |
+| Treatment speed | median 8 minutes to triage, but only **33%** receive antibiotics within 1 hour of registration (72% within 3 hours) |
+| Where time goes | about 80% of in-hospital time is on the ward; waits between ER steps are under 5% |
+| Return visits | 28% of patients return to the ER, a median of 46 days after discharge |
+| Missing endings | 26% of patients have no discharge event recorded |
 
-## Setup
+Waits are medians over retrospective timestamps and the antibiotics clock starts at ER registration, not at recognition of sepsis. The results show where delays happen, not why.
+
+## Quick start
 ```bash
 python -m venv .venv
-.venv\Scripts\activate        # Windows
+.venv\Scripts\activate            # Windows PowerShell; in Git Bash use: source .venv/Scripts/activate
 pip install -r requirements.txt
-python src/download_data.py   # fetches the Sepsis event log into data/raw/
-python src/load_data.py       # loads the log and prints its shape and sample rows
-python src/clean_data.py      # cleans the log, writes data/processed/sepsis_clean.csv and the quality report
-python src/prepare_log.py     # filters rare activities, adds features, writes sepsis_events.csv and sepsis_cases.csv
-python src/variants.py        # counts pathway variants, writes reports/top_variants.csv
-python src/discovery.py       # draws the process maps into reports/figures and scores the models
-python src/bottlenecks.py     # waiting times: writes reports/bottleneck_transitions.csv and the performance map
-```
+winget install Graphviz.Graphviz  # only needed to redraw the process maps (src/discovery.py, src/bottlenecks.py)
 
-Drawing the process maps needs the Graphviz program (the `graphviz` pip package is only a wrapper):
-```bash
-winget install Graphviz.Graphviz
-```
-`src/discovery.py` finds it in `C:\Program Files\Graphviz\bin` even if it is not on your PATH.
+python src/download_data.py       # fetch the raw event log into data/raw/
+python src/clean_data.py          # clean it
+python src/prepare_log.py         # prepare it for process mining
 
-Read the processed files with `load_clean_log()` (`src/clean_data.py`), `load_events()` and `load_cases()` (`src/prepare_log.py`). One case ID is literally `NA`, which a plain `pd.read_csv` would turn into a missing value.
+streamlit run app.py              # open the dashboard
+```
+`src/discovery.py` finds Graphviz in `C:\Program Files\Graphviz\bin` even if it is not on your PATH.
+
+## The pipeline
+Run the scripts in this order. Each writes its results to `data/processed/` (not committed) or `reports/`.
+
+| Step | Script | What it does | Main outputs |
+|---|---|---|---|
+| 1 | [src/download_data.py](src/download_data.py) | Downloads the Sepsis event log | `data/raw/sepsis.xes` |
+| 2 | [src/load_data.py](src/load_data.py) | Loads the XES file into a table | (used by later steps) |
+| 3 | [src/clean_data.py](src/clean_data.py) | Removes duplicates and 55 cases with impossible event order, fills case details | `sepsis_clean.csv`, [data quality report](reports/data_quality_report.md) |
+| 4 | [src/prepare_log.py](src/prepare_log.py) | Fixes tie order, filters rare activities, adds waiting-time features | `sepsis_events.csv`, `sepsis_cases.csv`, [report](reports/event_log_preparation.md) |
+| 5 | [src/variants.py](src/variants.py) | Counts pathway variants at two levels of detail | [top variants](reports/top_variants.csv) |
+| 6 | [src/discovery.py](src/discovery.py) | Draws process maps and scores the models | [model evaluation](reports/model_evaluation.csv), maps in `reports/figures/` |
+| 7 | [src/bottlenecks.py](src/bottlenecks.py) | Measures waits between steps | [transitions table](reports/bottleneck_transitions.csv), performance map |
+
+Read the processed files with `load_clean_log()` ([src/clean_data.py](src/clean_data.py)) and `load_events()` / `load_cases()` ([src/prepare_log.py](src/prepare_log.py)). One case ID is literally `NA`, which a plain `pd.read_csv` would turn into a missing value.
+
+### Notebooks
+Each notebook has its outputs saved, so it can be read without re-running.
+
+| Notebook | Content |
+|---|---|
+| [01_load_data](notebooks/01_load_data.ipynb) | Shape, columns, missing values of the raw log |
+| [02_eda](notebooks/02_eda.ipynb) | Exploratory analysis: volume, activities, case length, outcomes |
+| [03_variants](notebooks/03_variants.ipynb) | Pathway variants, coverage, duration by pathway |
+| [04_process_discovery](notebooks/04_process_discovery.ipynb) | Process maps and model quality |
+| [05_bottlenecks](notebooks/05_bottlenecks.ipynb) | Waiting times, time to antibiotics, where the time goes |
 
 ## Dashboard
-After running the pipeline above (at least `clean_data.py` and `prepare_log.py`), start the dashboard:
 ```bash
 streamlit run app.py
 ```
-It opens in the browser with five tabs: Overview, Pathways, Process map, Waiting times and About. The filters in the sidebar (registration dates, how the case ended, age group, returned to the ER) apply to every tab.
+Five tabs, all driven by the sidebar filters (registration dates, how the case ended, age group, returned to the ER):
+
+| Tab | What it shows |
+|---|---|
+| Overview | Key numbers, four insight cards, patients per month, how cases end, case duration |
+| Pathways | Most common pathways at clinical-step or exact level, coverage, per-pathway duration |
+| Process map | A live map of patient flow with counts or median waits, in either direction |
+| Waiting times | Time to antibiotics against the 1-hour and 3-hour marks, waits between ER steps, all transitions |
+| About | Data source, method, and how to read the numbers |
+
+The charts and logic are in [app.py](app.py). The look is defined in [assets/style.css](assets/style.css) (stylesheet) and [src/ui.py](src/ui.py) (HTML for the banner and cards).
+
+## Project structure
+```
+careflow/
+├── app.py                 # Streamlit dashboard
+├── assets/style.css       # dashboard stylesheet
+├── data/
+│   ├── raw/               # original event log (not committed)
+│   └── processed/         # cleaned and prepared logs (not committed)
+├── docs/
+│   └── data_dictionary.md # columns, activities, case/activity/timestamp mapping
+├── notebooks/             # five analysis notebooks
+├── reports/
+│   ├── figures/           # charts and process maps
+│   └── *.md, *.csv        # quality report, variants, model scores, waiting times
+├── src/                   # pipeline code (load, clean, prepare, variants, discovery, bottlenecks, ui)
+├── .streamlit/config.toml # dashboard theme
+├── pyrightconfig.json     # tells VS Code where src/ is
+└── requirements.txt
+```
 
 ## Dataset
-Sepsis Cases - Event Log (4TU.ResearchData, DOI 10.4121/uuid:915d2bfb-7e84-49ad-a286-dc35f063a460). See [docs/data_dictionary.md](docs/data_dictionary.md) for columns and the case/activity/timestamp mapping.
+*Sepsis Cases - Event Log* (Mannhardt, 2016, 4TU.ResearchData, DOI 10.4121/uuid:915d2bfb-7e84-49ad-a286-dc35f063a460): real, anonymised hospital data. See [docs/data_dictionary.md](docs/data_dictionary.md).
+
+## Limitations and open questions
+- The dataset is public research data, not data supplied by the company.
+- 26% of patients have no discharge event, and the reason is not in the data.
+- `Admission NC` is recorded more than once for many patients (320 immediate repeats); transfers or repeated records are both possible.
+- IV fluid and antibiotics are often recorded at the same moment, so they may be entered together rather than given together.
+- Process-model scores involve a trade-off: the heuristics model is the most precise (0.94) but only 15% of cases replay perfectly, while the inductive model with noise filtering replays 61%.
 
 ## Status
-- [x] Project scaffold
-- [x] Dataset and data dictionary
-- [x] Data loading ([src/load_data.py](src/load_data.py), [notebook](notebooks/01_load_data.ipynb))
-- [x] Data cleaning ([src/clean_data.py](src/clean_data.py), [quality report](reports/data_quality_report.md))
-- [x] Exploratory data analysis ([notebook](notebooks/02_eda.ipynb), charts in [reports/figures](reports/figures))
-- [x] Event log preparation ([src/prepare_log.py](src/prepare_log.py), [report](reports/event_log_preparation.md))
-- [x] Variant analysis ([src/variants.py](src/variants.py), [notebook](notebooks/03_variants.ipynb), [top variants](reports/top_variants.csv))
-- [x] Process discovery ([src/discovery.py](src/discovery.py), [notebook](notebooks/04_process_discovery.ipynb), [model evaluation](reports/model_evaluation.csv))
-- [x] Bottleneck analysis ([src/bottlenecks.py](src/bottlenecks.py), [notebook](notebooks/05_bottlenecks.ipynb), [transition table](reports/bottleneck_transitions.csv))
-- [x] Basic dashboard ([app.py](app.py)): `streamlit run app.py`
-- [ ] Conformance checking, final report
+- [x] Project setup, dataset and data dictionary
+- [x] Data loading and cleaning
+- [x] Exploratory data analysis
+- [x] Event log preparation
+- [x] Variant analysis
+- [x] Process discovery and model evaluation
+- [x] Bottleneck analysis
+- [x] Interactive dashboard
+- [ ] Conformance checking against an expected sepsis pathway
+- [ ] Rework and loop analysis
+- [ ] Final report, presentation and demo
