@@ -25,6 +25,7 @@ Cleaned data: **995 patients, 14,208 events, 15 activities** (from 1,050 patient
 | Where time goes | about 80% of in-hospital time is on the ward; waits between ER steps are under 5% |
 | Return visits | 28% of patients return to the ER, a median of 46 days after discharge |
 | Missing endings | 26% of patients have no discharge event recorded |
+| Conformance | 33% of patients follow the assumed expected pathway exactly (average fitness 0.90); the largest deviation pattern is an extra `Admission NC` record (20% of patients) |
 
 Waits are medians over retrospective timestamps and the antibiotics clock starts at ER registration, not at recognition of sepsis. The results show where delays happen, not why.
 
@@ -55,6 +56,7 @@ Run the scripts in this order. Each writes its results to `data/processed/` (not
 | 5 | [src/variants.py](src/variants.py) | Counts pathway variants at two levels of detail | [top variants](reports/top_variants.csv) |
 | 6 | [src/discovery.py](src/discovery.py) | Draws process maps and scores the models | [model evaluation](reports/model_evaluation.csv), maps in `reports/figures/` |
 | 7 | [src/bottlenecks.py](src/bottlenecks.py) | Measures waits between steps | [transitions table](reports/bottleneck_transitions.csv), performance map |
+| 8 | [src/conformance.py](src/conformance.py) | Checks each patient against an expected sepsis pathway | `sepsis_conformance.csv`, [deviation summary](reports/conformance_summary.csv), [patterns](reports/conformance_patterns.csv) |
 
 Read the processed files with `load_clean_log()` ([src/clean_data.py](src/clean_data.py)) and `load_events()` / `load_cases()` ([src/prepare_log.py](src/prepare_log.py)). One case ID is literally `NA`, which a plain `pd.read_csv` would turn into a missing value.
 
@@ -68,6 +70,7 @@ Each notebook has its outputs saved, so it can be read without re-running.
 | [03_variants](notebooks/03_variants.ipynb) | Pathway variants, coverage, duration by pathway |
 | [04_process_discovery](notebooks/04_process_discovery.ipynb) | Process maps and model quality |
 | [05_bottlenecks](notebooks/05_bottlenecks.ipynb) | Waiting times, time to antibiotics, where the time goes |
+| [06_conformance](notebooks/06_conformance.ipynb) | Conformance to the expected pathway: fitness, deviations, patterns |
 
 ## Dashboard
 ```bash
@@ -110,6 +113,7 @@ careflow/
 
 ## Limitations and open questions
 - The dataset is public research data, not data supplied by the company.
+- The expected sepsis pathway used for conformance checking is an assumption (the standard route in the data plus the usual care sequence); a different definition gives different conformance numbers.
 - 26% of patients have no discharge event, and the reason is not in the data.
 - `Admission NC` is recorded more than once for many patients (320 immediate repeats); transfers or repeated records are both possible.
 - IV fluid and antibiotics are often recorded at the same moment, so they may be entered together rather than given together.
@@ -124,6 +128,6 @@ careflow/
 - [x] Process discovery and model evaluation
 - [x] Bottleneck analysis
 - [x] Interactive dashboard
-- [ ] Conformance checking against an expected sepsis pathway
+- [x] Conformance checking against an expected sepsis pathway ([src/conformance.py](src/conformance.py), [notebook](notebooks/06_conformance.ipynb)); the expected pathway is an assumption to confirm with the mentor
 - [ ] Rework and loop analysis
 - [ ] Final report, presentation and demo

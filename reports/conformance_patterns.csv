@@ -1,0 +1,11 @@
+description,cases,share_of_all_pct
+extra Admission NC,202,20.3
+"missing IV Antibiotics, Admission (any), Release (any)",118,11.86
+"missing Admission (any), Release (any)",106,10.65
+missing IV Antibiotics,64,6.43
+missing IV Antibiotics and extra Admission NC,30,3.02
+extra IV Liquid,28,2.81
+extra Admission NC (x2),22,2.21
+missing Release (any),17,1.71
+extra Admission NC (x3),9,0.9
+"extra IV Liquid, Admission NC",8,0.8

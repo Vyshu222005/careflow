@@ -1,0 +1,8 @@
+deviation,kind,cases,share_pct
+Does not follow the expected pathway exactly,formal,666,66.93
+Antibiotics later than 1 hour after registration,rule,517,51.96
+A clinical step is repeated,rule,300,30.15
+No discharge recorded,rule,256,25.73
+No ward or ICU admission recorded,rule,230,23.12
+No antibiotics recorded,rule,219,22.01
+Treatment before sepsis triage,rule,37,3.72
