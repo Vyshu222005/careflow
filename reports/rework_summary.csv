@@ -1,0 +1,28 @@
+metric,value,explanation
+patients,995.0,patients analysed
+patients_with_rework,300.0,patients who repeat at least one clinical step
+share_with_rework_pct,30.15,share of all patients
+patients_repeating_ward_record,294.0,patients with more than one Admission NC record
+extra_ward_records,356.0,Admission NC records beyond the first
+immediate_repeats,325.0,a step directly after itself
+patients_with_loop_back,38.0,a step reappears after a different step
+ward_gaps_under_24h_pct,62.08,share of gaps between repeated ward records under one day
+ward_gaps_median_hours,18.79,median hours between repeated ward records
+ward_record_span_median_days,0.8,median days from first to last ward record (patients with several)
+ward_stay_median_days_one_record,4.65,"median ward stay, patients with one ward record"
+ward_stay_median_days_several_records,6.48,"median ward stay, patients with several ward records"
+patients_returning,278.0,patients with a Return ER event
+released_patients,739.0,patients with a discharge event
+return_rate_of_released_pct,37.62,share of discharged patients who return
+return_median_days,46.52,median days from discharge to return
+returns_within_7d,44.0,returns within 7 days of discharge
+returns_within_7d_share_of_returns_pct,15.83,share of returns within 7 days
+returns_within_7d_share_of_released_pct,5.95,share of all discharged patients who return within 7 days
+returns_within_30d,111.0,returns within 30 days of discharge
+returns_within_30d_share_of_returns_pct,39.93,share of returns within 30 days
+returns_within_30d_share_of_released_pct,15.02,share of all discharged patients who return within 30 days
+returns_within_90d,184.0,returns within 90 days of discharge
+returns_within_90d_share_of_returns_pct,66.19,share of returns within 90 days
+returns_within_90d_share_of_released_pct,24.9,share of all discharged patients who return within 90 days
+lab_tests_median_per_patient,5.0,"repeated blood tests are routine monitoring, not rework"
+lab_events_total,7507.0,lab-test events

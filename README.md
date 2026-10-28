@@ -25,6 +25,7 @@ Cleaned data: **995 patients, 14,208 events, 15 activities** (from 1,050 patient
 | Where time goes | about 80% of in-hospital time is on the ward; waits between ER steps are under 5% |
 | Return visits | 28% of patients return to the ER, a median of 46 days after discharge |
 | Missing endings | 26% of patients have no discharge event recorded |
+| Rework | 30% of patients repeat a step, almost always the ward admission record (294 patients); true loops are rare (38 patients). 37.6% of discharged patients return, 15% within 30 days |
 | Conformance | 33% of patients follow the assumed expected pathway exactly (average fitness 0.90); the largest deviation pattern is an extra `Admission NC` record (20% of patients) |
 
 Waits are medians over retrospective timestamps and the antibiotics clock starts at ER registration, not at recognition of sepsis. The results show where delays happen, not why.
@@ -57,6 +58,7 @@ Run the scripts in this order. Each writes its results to `data/processed/` (not
 | 6 | [src/discovery.py](src/discovery.py) | Draws process maps and scores the models | [model evaluation](reports/model_evaluation.csv), maps in `reports/figures/` |
 | 7 | [src/bottlenecks.py](src/bottlenecks.py) | Measures waits between steps | [transitions table](reports/bottleneck_transitions.csv), performance map |
 | 8 | [src/conformance.py](src/conformance.py) | Checks each patient against an expected sepsis pathway | `sepsis_conformance.csv`, [deviation summary](reports/conformance_summary.csv), [patterns](reports/conformance_patterns.csv) |
+| 9 | [src/rework.py](src/rework.py) | Finds repeated steps, loops and return visits | `sepsis_rework.csv`, [repeated steps](reports/rework_steps.csv), [summary](reports/rework_summary.csv) |
 
 Read the processed files with `load_clean_log()` ([src/clean_data.py](src/clean_data.py)) and `load_events()` / `load_cases()` ([src/prepare_log.py](src/prepare_log.py)). One case ID is literally `NA`, which a plain `pd.read_csv` would turn into a missing value.
 
@@ -71,6 +73,7 @@ Each notebook has its outputs saved, so it can be read without re-running.
 | [04_process_discovery](notebooks/04_process_discovery.ipynb) | Process maps and model quality |
 | [05_bottlenecks](notebooks/05_bottlenecks.ipynb) | Waiting times, time to antibiotics, where the time goes |
 | [06_conformance](notebooks/06_conformance.ipynb) | Conformance to the expected pathway: fitness, deviations, patterns |
+| [07_rework](notebooks/07_rework.ipynb) | Repeated steps, loops, ward records and return visits |
 
 ## Dashboard
 ```bash
@@ -129,5 +132,5 @@ careflow/
 - [x] Bottleneck analysis
 - [x] Interactive dashboard
 - [x] Conformance checking against an expected sepsis pathway ([src/conformance.py](src/conformance.py), [notebook](notebooks/06_conformance.ipynb)); the expected pathway is an assumption to confirm with the mentor
-- [ ] Rework and loop analysis
+- [x] Rework and loop analysis ([src/rework.py](src/rework.py), [notebook](notebooks/07_rework.ipynb))
 - [ ] Final report, presentation and demo
