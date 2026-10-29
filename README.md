@@ -23,7 +23,7 @@ Cleaned data: **995 patients, 14,208 events, 15 activities** (from 1,050 patient
 | Standard pathway | Registration, Triage, Sepsis triage, IV fluid, Antibiotics, Ward, Release A: 22.5% of patients |
 | Treatment speed | median 8 minutes to triage, but only **33%** receive antibiotics within 1 hour of registration (72% within 3 hours) |
 | Where time goes | about 80% of in-hospital time is on the ward; waits between ER steps are under 5% |
-| Return visits | 28% of patients return to the ER, a median of 46 days after discharge |
+| Return visits | 28% of patients return to the ER, a median of 46.5 days after discharge |
 | Missing endings | 26% of patients have no discharge event recorded |
 | Rework | 30% of patients repeat a step, almost always the ward admission record (294 patients); true loops are rare (38 patients). 37.6% of discharged patients return, 15% within 30 days |
 | Conformance | 33% of patients follow the assumed expected pathway exactly (average fitness 0.90); the largest deviation pattern is an extra `Admission NC` record (20% of patients) |

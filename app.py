@@ -74,8 +74,8 @@ def style(fig: go.Figure, height: int = 340, top: int = 8) -> go.Figure:
         font=dict(family="Inter, Segoe UI, Roboto, sans-serif", size=12, color=INK_SOFT),
         hoverlabel=dict(bgcolor="white", font_size=12, font_color=INK, bordercolor="#d0d5dd"),
     )
-    fig.update_xaxes(gridcolor=GRID, zeroline=False, linecolor=GRID)
-    fig.update_yaxes(gridcolor=GRID, zeroline=False, linecolor=GRID)
+    fig.update_xaxes(gridcolor=GRID, zeroline=False, linecolor=GRID, automargin=True)
+    fig.update_yaxes(gridcolor=GRID, zeroline=False, linecolor=GRID, automargin=True)
     return fig
 
 
@@ -177,9 +177,9 @@ with tab_overview:
     insight = st.columns(4)
     ui.insight(insight[0], "Treatment speed", f"{antibiotics['within_1h_pct']:.0f}%" if has_abx else "n/a",
                "of patients receive antibiotics within 1 hour of registration (commonly quoted sepsis target).", "drop")
-    return_days = median_return_days(events)
+    return_days = median_return_days(clean_log[clean_log[CASE_ID].isin(cases[CASE_ID])])  # same log as the Rework tab
     ui.insight(insight[1], "Return visits", f"{cases['returned_to_er'].mean() * 100:.0f}%",
-               "of patients return to the ER" + (f", a median of {return_days:.0f} days after discharge." if return_days else "."),
+               "of patients return to the ER" + (f", a median of {return_days:.1f} days after discharge." if return_days else "."),
                "repeat")
     ui.insight(insight[2], "Missing endings", f"{(cases['outcome'] == 'No release recorded').mean() * 100:.0f}%",
                "of patients have no discharge event recorded, so their pathway stops early in the data.", "alert")
@@ -418,7 +418,7 @@ with tab_conf:
     with right, st.container(key="card_conf_fit"):
         ui.section("How closely patients follow it", "Fitness: 1.0 means the patient follows the pathway exactly.")
         edges = [0, 0.7, 0.8, 0.9, 0.9999999, 1.01]
-        labels = ["Below 0.7", "0.7 to 0.8", "0.8 to 0.9", "0.9 to 1.0", "Exactly 1.0"]
+        labels = ["under 0.7", "0.7-0.8", "0.8-0.9", "0.9-1.0", "exactly 1.0"]
         groups = pd.cut(conf["fitness"], bins=edges, labels=labels, right=False).value_counts().reindex(labels)
         fig = go.Figure(go.Bar(
             x=groups.index, y=groups.values, marker_color=BLUE, customdata=groups.values / max(len(conf), 1) * 100,
@@ -446,7 +446,7 @@ with tab_conf:
         st.markdown(
             "Written as a process tree: `->` is a sequence, `+` runs steps in parallel, `X` is a choice, `tau` means the step can be skipped."
         )
-        st.code(conformance.EXPECTED_PATHWAY, language="text")
+        st.code(conformance.EXPECTED_PATHWAY, language="text", wrap_lines=True)
         st.markdown(
             "- **Missing** steps are expected but not recorded; **extra** steps are recorded but not expected.\n"
             "- Timing is **not** part of the formal check, only the order of steps. Late antibiotics are shown separately.\n"
@@ -530,7 +530,7 @@ with tab_rework:
                              title="Time since discharge (log scale)")
             fig.update_yaxes(title="Share of returns so far (%)", range=[0, 102])
             show(style(fig, 340))
-            st.caption(f"{len(returns):,} of {released:,} discharged patients return; the median is {returns['days_to_return'].median():.0f} days after discharge.")
+            st.caption(f"{len(returns):,} of {released:,} discharged patients return; the median is {returns['days_to_return'].median():.1f} days after discharge.")
 
 # ---------- about ----------
 with tab_about:

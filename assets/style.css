@@ -106,8 +106,9 @@ header[data-testid="stHeader"] { background: transparent; }
 
 /* ---------- sidebar ---------- */
 [data-testid="stSidebar"] { background: #fff; border-right: 1px solid var(--line); }
-[data-testid="stSidebarUserContent"] { padding-top: .5rem; }
-.side-brand { display: flex; align-items: center; gap: .75rem; padding: .1rem 0 1rem; margin-bottom: .9rem; border-bottom: 1px solid var(--line); }
+[data-testid="stSidebarHeader"] { height: 2rem; margin-bottom: 0; }
+[data-testid="stSidebarUserContent"] { padding-top: 0; }
+.side-brand { display: flex; align-items: center; gap: .75rem; padding: .1rem 0 1.1rem; margin-bottom: 1.7rem; border-bottom: 1px solid var(--line); }
 .side-logo {
   width: 40px; height: 40px; border-radius: 11px; flex: none; display: flex; align-items: center; justify-content: center;
   background: linear-gradient(135deg, var(--blue-dark), var(--blue));
