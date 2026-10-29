@@ -41,35 +41,26 @@ def clinical_steps(log: pd.DataFrame) -> pd.DataFrame:
     return milestone_log(log)
 
 
-def _loop_backs(activities: pd.Series) -> int:
-    """Count steps that reappear after a different step in between."""
-    seen, last, loops = set(), None, 0
-    for name in activities:
-        if name != last and name in seen:
-            loops += 1
-        seen.add(name)
-        last = name
-    return loops
-
-
 def rework_per_case(steps: pd.DataFrame) -> pd.DataFrame:
-    """Per case: number of repeats, which steps repeat, immediate repeats and loop backs."""
-    rows = []
-    for case, group in steps.groupby(CASE_ID, sort=False):
-        names = group[ACTIVITY]
-        counts = names.value_counts()
-        repeated = counts[counts > 1]
-        immediate = int((names == names.shift(1)).sum())
-        rows.append({
-            CASE_ID: case,
-            "n_repeats": int((repeated - 1).sum()),
-            "repeated_steps": "; ".join(repeated.index),
-            "immediate_repeats": immediate,
-            "loop_backs": _loop_backs(names),
-        })
-    table = pd.DataFrame(rows)
+    """Per case: number of repeats, which steps repeat, immediate repeats and loop backs.
+
+    `steps` must be in time order within each case.
+    """
+    cases = pd.Index(steps[CASE_ID].unique(), name=CASE_ID)
+    by_step = steps.groupby([CASE_ID, ACTIVITY])
+    occurrence = by_step.cumcount()  # 0 for the first time a step occurs in a case
+    immediate = steps[ACTIVITY] == steps.groupby(CASE_ID)[ACTIVITY].shift(1)
+
+    counts = by_step.size()
+    repeated = counts[counts > 1].reset_index(name="n")
+    table = pd.DataFrame(index=cases)
+    table["n_repeats"] = (occurrence > 0).groupby(steps[CASE_ID]).sum().reindex(cases).astype(int)
+    table["repeated_steps"] = repeated.groupby(CASE_ID)[ACTIVITY].agg("; ".join).reindex(cases).fillna("")
+    table["immediate_repeats"] = immediate.groupby(steps[CASE_ID]).sum().reindex(cases).astype(int)
+    # a loop back is a step that has occurred before and does not directly follow itself
+    table["loop_backs"] = ((occurrence > 0) & ~immediate).groupby(steps[CASE_ID]).sum().reindex(cases).astype(int)
     table["has_rework"] = table["n_repeats"] > 0
-    return table
+    return table.reset_index()
 
 
 def step_rework_table(steps: pd.DataFrame) -> pd.DataFrame:

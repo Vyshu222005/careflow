@@ -79,7 +79,7 @@ Each notebook has its outputs saved, so it can be read without re-running.
 ```bash
 streamlit run app.py
 ```
-Five tabs, all driven by the sidebar filters (registration dates, how the case ended, age group, returned to the ER):
+Seven tabs, all driven by the sidebar filters (registration dates, how the case ended, age group, returned to the ER):
 
 | Tab | What it shows |
 |---|---|
@@ -87,6 +87,8 @@ Five tabs, all driven by the sidebar filters (registration dates, how the case e
 | Pathways | Most common pathways at clinical-step or exact level, coverage, per-pathway duration |
 | Process map | A live map of patient flow with counts or median waits, in either direction |
 | Waiting times | Time to antibiotics against the 1-hour and 3-hour marks, waits between ER steps, all transitions |
+| Conformance | How closely patients follow the expected pathway: fitness, deviations, deviation patterns |
+| Rework | Repeated steps, gaps between repeated ward records, ward stay, and how soon patients return |
 | About | Data source, method, and how to read the numbers |
 
 The charts and logic are in [app.py](app.py). The look is defined in [assets/style.css](assets/style.css) (stylesheet) and [src/ui.py](src/ui.py) (HTML for the banner and cards).
