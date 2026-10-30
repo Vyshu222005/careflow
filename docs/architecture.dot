@@ -1,0 +1,42 @@
+digraph CareFlow {
+  rankdir=LR; bgcolor="white"; nodesep=0.35; ranksep=0.75; compound=true;
+  fontname="Helvetica"; node [fontname="Helvetica" fontsize=11 shape=box style="rounded,filled" penwidth=0 margin="0.16,0.09"];
+  edge [fontname="Helvetica" fontsize=9 color="#667085" arrowsize=0.7];
+
+  subgraph cluster_data { label="1  Data"; style="rounded,filled"; fillcolor="#f3f6fb"; color="#d0d5dd"; fontsize=12;
+    raw  [label="Sepsis event log\n(XES, 4TU)" fillcolor="#98a2b3" fontcolor="white"];
+    pipe [label="download_data\nload_data\nclean_data\nprepare_log" fillcolor="#2a78d6" fontcolor="white"];
+    val  [label="validation\n(input checks,\ncount reconciliation)" fillcolor="#17508f" fontcolor="white"];
+  }
+  subgraph cluster_analytics { label="2  Process mining and analytics"; style="rounded,filled"; fillcolor="#f3f6fb"; color="#d0d5dd"; fontsize=12;
+    path [label="variants\ndiscovery (pm4py)" fillcolor="#7fb2ec"];
+    bott [label="bottlenecks" fillcolor="#7fb2ec"];
+    qual [label="conformance\nrework\nbundle (control charts)\nhandover" fillcolor="#7fb2ec"];
+  }
+  subgraph cluster_ml { label="3  Machine learning"; style="rounded,filled"; fillcolor="#f3f6fb"; color="#d0d5dd"; fontsize=12;
+    feat [label="delay_features\n(leakage guard)" fillcolor="#1baf7a" fontcolor="white"];
+    mod  [label="delay_model\nLogReg, RandomForest, XGBoost\nCV, hold-out, temporal" fillcolor="#1baf7a" fontcolor="white"];
+    xai  [label="explain (SHAP)" fillcolor="#1baf7a" fontcolor="white"];
+  }
+  subgraph cluster_decide { label="4  Decision support"; style="rounded,filled"; fillcolor="#f3f6fb"; color="#d0d5dd"; fontsize=12;
+    sim  [label="simulator\n(what-if)" fillcolor="#eb6834" fontcolor="white"];
+    ins  [label="insights\n(transparent rules)" fillcolor="#eb6834" fontcolor="white"];
+    rep  [label="report\n(PDF)" fillcolor="#eb6834" fontcolor="white"];
+  }
+  subgraph cluster_ui { label="5  Dashboard (Streamlit)"; style="rounded,filled"; fillcolor="#eaf2fd"; color="#cfe2fa"; fontsize=12;
+    app  [label="app.py\nnavigation, sidebar filters\nassets/style.css, src/ui.py" fillcolor="#0f2d52" fontcolor="white"];
+    tabs [label="10 pages in a left sidebar menu
+Monitor | Quality & Flow | Intelligence | Output" fillcolor="#0f2d52" fontcolor="white"];
+  }
+  out  [label="Downloads\nPDF report, CSV tables" fillcolor="#98a2b3" fontcolor="white"];
+  qa   [label="Quality\npytest (87 tests)\nGitHub Actions CI\nDocker" shape=note fillcolor="#fff6e5" fontcolor="#7a4b00"];
+
+  raw -> pipe -> val;
+  val -> path; val -> bott; val -> qual; val -> feat;
+  feat -> mod -> xai;
+  path -> ins; bott -> ins; qual -> ins; bott -> sim; qual -> sim;
+  mod -> rep; xai -> rep; ins -> rep; sim -> rep;
+  path -> app; bott -> app; qual -> app; mod -> app; xai -> app; sim -> app; ins -> app; rep -> app;
+  app -> tabs; rep -> out;
+  qa -> app [style=dashed arrowhead=none];
+}

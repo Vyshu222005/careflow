@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  tests:
+    name: Unit tests (synthetic data)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install system packages
+        run: sudo apt-get update && sudo apt-get install -y graphviz
+      - name: Install Python packages
+        run: pip install -r requirements.txt
+      - name: Check that every module compiles
+        run: python -m compileall -q src dashboard app.py tests
+      - name: Run the tests
+        # The real dataset is not in the repository, so the integration tests skip themselves here.
+        run: python -m pytest -q
+
+  integration:
+    name: Integration tests (real dataset, best effort)
+    runs-on: ubuntu-latest
+    needs: tests
+    # Downloads the public dataset from 4TU.ResearchData. If the download is unavailable, this job fails without blocking the rest.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install system packages
+        run: sudo apt-get update && sudo apt-get install -y graphviz
+      - name: Install Python packages
+        run: pip install -r requirements.txt
+      - name: Build the data
+        run: |
+          python src/download_data.py
+          python src/clean_data.py
+          python src/prepare_log.py
+      - name: Run all tests including the real-data checks
+        run: python -m pytest -q

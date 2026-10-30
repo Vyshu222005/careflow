@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="48" viewBox="0 0 240 48">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#17508f"/>
+      <stop offset="1" stop-color="#2a78d6"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="44" height="44" rx="12" fill="url(#g)"/>
+  <g transform="translate(10.5 10.5) scale(1.1)" fill="none" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+  </g>
+  <text x="56" y="23" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="22" font-weight="800" fill="#0f2d52">CareFlow</text>
+  <text x="56" y="39" font-family="Inter, 'Segoe UI', Arial, sans-serif" font-size="11" font-weight="500" fill="#667085">Sepsis pathway analytics</text>
+</svg>

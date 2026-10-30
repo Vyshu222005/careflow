@@ -1,150 +1,156 @@
-# CareFlow: Clinical Pathway Process Mining
+# CareFlow 2.0: Clinical Pathway Monitoring, Predictive Analytics and Explainable Decision Support
 
-Process mining of real sepsis emergency-room data: which pathways patients actually follow, and where they wait.
+Process mining, machine learning and decision support for real sepsis emergency-room data.
 Data Analytics internship project at Infotact Solutions (Ref. ITS/DA/1370).
 
-## Overview
-Hospitals record every step of a patient's journey (registration, tests, treatment, admission, discharge) but rarely study how patients really move through care. CareFlow applies **process mining** to a public hospital event log to:
+![Architecture](docs/architecture.png)
 
-1. clean and validate the event log,
-2. discover the real patient pathways and how common each one is,
-3. find where patients wait (bottlenecks),
-4. present the results in an interactive dashboard.
+## What it does
+Hospitals record every step of a patient's journey but rarely study how patients really move through care. CareFlow turns a public hospital event log into an interactive decision-support dashboard that answers:
 
-Process mining needs three fields: a **case** (one patient's journey), an **activity** (one step) and a **timestamp**.
-
-## Key results
-Cleaned data: **995 patients, 14,208 events, 15 activities** (from 1,050 patients and 15,214 events in the raw log).
-
-| Finding | Result |
-|---|---|
-| Typical case length | median 5.2 days; 26% finish within a day, 19% last over 30 days |
-| Pathway variety | 619 exact pathways (54% of patients follow one nobody else did), but only **96** once repeated lab tests are left out; the top 10 cover **73%** of patients |
-| Standard pathway | Registration, Triage, Sepsis triage, IV fluid, Antibiotics, Ward, Release A: 22.5% of patients |
-| Treatment speed | median 8 minutes to triage, but only **33%** receive antibiotics within 1 hour of registration (72% within 3 hours) |
-| Where time goes | about 80% of in-hospital time is on the ward; waits between ER steps are under 5% |
-| Return visits | 28% of patients return to the ER, a median of 46.5 days after discharge |
-| Missing endings | 26% of patients have no discharge event recorded |
-| Care bundle | Only 18% of patients receive every applicable early sepsis care element on time (adapted hour-1 bundle): lactate within 1 hour 76%, antibiotics within 1 hour 26%. A control chart shows care is stable but low, not improving (only Jan 2014 is outside the limits) |
-| Departments | 26 anonymised departments (one laboratory records 53% of events); 6,642 handovers. 89% of repeated ward records are recorded by a different unit than the previous record, so they are mostly transfers, not duplicates |
-| Rework | 30% of patients repeat a step, almost always the ward admission record (294 patients); true loops are rare (38 patients). 37.6% of discharged patients return, 15% within 30 days |
-| Conformance | 33% of patients follow the assumed expected pathway exactly (average fitness 0.90); the largest deviation pattern is an extra `Admission NC` record (20% of patients) |
-
-Waits are medians over retrospective timestamps and the antibiotics clock starts at ER registration, not at recognition of sepsis. The results show where delays happen, not why.
-
-## Quick start
-```bash
-python -m venv .venv
-.venv\Scripts\activate            # Windows PowerShell; in Git Bash use: source .venv/Scripts/activate
-pip install -r requirements.txt
-winget install Graphviz.Graphviz  # only needed to redraw the process maps (src/discovery.py, src/bottlenecks.py)
-
-python src/download_data.py       # fetch the raw event log into data/raw/
-python src/clean_data.py          # clean it
-python src/prepare_log.py         # prepare it for process mining
-
-streamlit run app.py              # open the dashboard
-```
-`src/discovery.py` finds Graphviz in `C:\Program Files\Graphviz\bin` even if it is not on your PATH.
-
-## The pipeline
-Run the scripts in this order. Each writes its results to `data/processed/` (not committed) or `reports/`.
-
-| Step | Script | What it does | Main outputs |
-|---|---|---|---|
-| 1 | [src/download_data.py](src/download_data.py) | Downloads the Sepsis event log | `data/raw/sepsis.xes` |
-| 2 | [src/load_data.py](src/load_data.py) | Loads the XES file into a table | (used by later steps) |
-| 3 | [src/clean_data.py](src/clean_data.py) | Removes duplicates and 55 cases with impossible event order, fills case details | `sepsis_clean.csv`, [data quality report](reports/data_quality_report.md) |
-| 4 | [src/prepare_log.py](src/prepare_log.py) | Fixes tie order, filters rare activities, adds waiting-time features | `sepsis_events.csv`, `sepsis_cases.csv`, [report](reports/event_log_preparation.md) |
-| 5 | [src/variants.py](src/variants.py) | Counts pathway variants at two levels of detail | [top variants](reports/top_variants.csv) |
-| 6 | [src/discovery.py](src/discovery.py) | Draws process maps and scores the models | [model evaluation](reports/model_evaluation.csv), maps in `reports/figures/` |
-| 7 | [src/bottlenecks.py](src/bottlenecks.py) | Measures waits between steps | [transitions table](reports/bottleneck_transitions.csv), performance map |
-| 8 | [src/conformance.py](src/conformance.py) | Checks each patient against an expected sepsis pathway | `sepsis_conformance.csv`, [deviation summary](reports/conformance_summary.csv), [patterns](reports/conformance_patterns.csv) |
-| 9 | [src/rework.py](src/rework.py) | Finds repeated steps, loops and return visits | `sepsis_rework.csv`, [repeated steps](reports/rework_steps.csv), [summary](reports/rework_summary.csv) |
-| 10 | [src/bundle.py](src/bundle.py) | Scores an adapted sepsis care bundle and draws monthly control charts | `sepsis_bundle.csv`, [scorecard](reports/bundle_scorecard.csv), [monthly trend](reports/bundle_trend.csv) |
-| 11 | [src/handover.py](src/handover.py) | Finds which departments hand over to which, and what the ward transfers are | [workload](reports/department_workload.csv), [handover pairs](reports/handover_pairs.csv), [ward transfers](reports/ward_transfers.csv) |
-
-Read the processed files with `load_clean_log()` ([src/clean_data.py](src/clean_data.py)) and `load_events()` / `load_cases()` ([src/prepare_log.py](src/prepare_log.py)). One case ID is literally `NA`, which a plain `pd.read_csv` would turn into a missing value.
-
-### Notebooks
-Each notebook has its outputs saved, so it can be read without re-running.
-
-| Notebook | Content |
-|---|---|
-| [01_load_data](notebooks/01_load_data.ipynb) | Shape, columns, missing values of the raw log |
-| [02_eda](notebooks/02_eda.ipynb) | Exploratory analysis: volume, activities, case length, outcomes |
-| [03_variants](notebooks/03_variants.ipynb) | Pathway variants, coverage, duration by pathway |
-| [04_process_discovery](notebooks/04_process_discovery.ipynb) | Process maps and model quality |
-| [05_bottlenecks](notebooks/05_bottlenecks.ipynb) | Waiting times, time to antibiotics, where the time goes |
-| [06_conformance](notebooks/06_conformance.ipynb) | Conformance to the expected pathway: fitness, deviations, patterns |
-| [07_rework](notebooks/07_rework.ipynb) | Repeated steps, loops, ward records and return visits |
-| [08_bundle_scorecard](notebooks/08_bundle_scorecard.ipynb) | Adapted sepsis care-bundle scorecard and monthly control charts |
-| [09_department_handover](notebooks/09_department_handover.ipynb) | Department workload, handover network and ward transfers |
+1. **Which pathways do patients really follow?** (process discovery, variants, patient journeys)
+2. **Where do they wait?** (bottleneck analysis, monthly delay trends)
+3. **Do they follow the expected pathway, and is care improving?** (conformance checking, care-bundle scorecard with control charts)
+4. **How do departments hand patients over?** (rework, returns, handover network)
+5. **Can delay be predicted, and why?** (validated models with SHAP explanations)
+6. **What if the waits were shorter?** (transparent what-if simulator)
+7. **What deserves attention first?** (rule-based insights, downloadable PDF reports)
 
 ## Dashboard
 ```bash
 streamlit run app.py
 ```
-Nine tabs, all driven by the sidebar filters (registration dates, how the case ended, age group, returned to the ER):
+A permanent **left sidebar menu** with four groups and ten pages. The CareFlow logo sits at the top, the active page is highlighted, and the patient filters (registration dates, how the case ended, age group, returned to the ER) are in a collapsible **Patient filters** section below the menu, under a live "Patients selected" counter. Every page responds to the same filters. KPI and insight cards use a responsive grid: four columns on desktop, two on tablets, one on phones.
 
-| Tab | What it shows |
+| Group | Page | Contents |
+|---|---|---|
+| **MONITOR** | **Overview** | Key figures, insight cards, patients per month, how cases end, case duration, top operational bottlenecks |
+| | **Patient Pathways** | Sub-tabs: common pathways, interactive process map, single-patient journey |
+| | **Bottleneck Analysis** | Waits between steps, time to antibiotics, registration-to-triage waits, monthly delay trends, delay by arrival time |
+| **QUALITY & FLOW** | **Quality & Conformance** | Sub-tabs: expected versus actual pathway (fitness, missing and extra steps); care-bundle scorecard with monthly control charts |
+| | **Department Flow** | Sub-tabs: repeated steps, returns and ward stays; department handover network and ward transfers |
+| **INTELLIGENCE** | **Predictive Intelligence** | Delay models (logistic regression, random forest, XGBoost), ROC/PR curves, risk groups, SHAP importance and per-patient explanations |
+| | **What-if Simulator** | Hypothetical shorter waits, baseline against scenario, sensitivity curve (clearly labelled hypothetical) |
+| | **Smart Insights** | Transparent rules that flag workflow issues, each with the rule, the evidence and what to review |
+| **OUTPUT** | **Reports** | Downloadable PDF with key figures, findings, charts, optional model summary and what-if scenario |
+| | **About** | Dataset, methodology, technologies, cleaning, limitations, references |
+
+## Key results
+Cleaned data: **995 patients, 14,214 events** (from 1,050 patients and 15,214 events in the raw log).
+
+| Finding | Result |
 |---|---|
-| Overview | Key numbers, four insight cards, patients per month, how cases end, case duration |
-| Pathways | Most common pathways at clinical-step or exact level, coverage, per-pathway duration |
-| Process map | A live map of patient flow with counts or median waits, in either direction |
-| Waiting times | Time to antibiotics against the 1-hour and 3-hour marks, waits between ER steps, all transitions |
-| Conformance | How closely patients follow the expected pathway: fitness, deviations, deviation patterns |
-| Rework | Repeated steps, gaps between repeated ward records, ward stay, and how soon patients return |
-| Care bundle | Scorecard of early sepsis care elements and a monthly control chart (is care improving?) |
-| Departments | Handover network between departments, workload, and moves between ward units |
-| About | Data source, method, and how to read the numbers |
+| Typical case length | median 5.2 days; 26% finish within a day, 19% last over 30 days |
+| Pathway variety | 619 exact pathways (54% of patients follow one nobody else did), only **96** once repeated lab tests are left out; the top 10 cover **73%** |
+| Treatment speed | **33%** of treated patients receive antibiotics within 1 hour of registration (26% of all patients; 72% of treated patients within 3 hours) |
+| Where the delay is | Among patients treated after more than 1 hour, the long wait is **after** sepsis triage (median 2.5 h), not before it (median 10 minutes) |
+| Conformance | 33% follow the assumed expected pathway exactly (average fitness 0.90) |
+| Care bundle | 18% meet every applicable early-care element on time; care is stable but low (one month outside control limits) |
+| Rework | 30% repeat a step, almost always the ward admission record; 89% of those repeats are recorded by a different unit, so they are mostly **transfers** |
+| Returns | 37.6% of discharged patients return to the ER (median 46.5 days later); 15% within 30 days |
+| Missing endings | 26% of patients have no discharge event recorded |
+| **Predicting delay** | **At registration: no better than chance (ROC-AUC 0.50). At sepsis triage: a weak signal (ROC-AUC 0.58).** Delays are mostly not explained by patient or arrival information |
 
-The charts and logic are in [app.py](app.py). The look is defined in [assets/style.css](assets/style.css) (stylesheet) and [src/ui.py](src/ui.py) (HTML for the banner and cards).
+Results show where delays happen, not why.
+
+### Event counts: 14,214 and 14,208
+Both numbers are correct; they describe two pipeline stages. The **cleaned log has 14,214 events**. `prepare_log.py` then drops activities seen in under 1% of patients, which removes only `Release E` (**6 events, 6 patients**), leaving **14,208 events** for pathway, process-map and waiting-time analysis. The patient count (995) never changes. `src/validation.py` reconciles the two stages, the dashboard labels each one, and a test checks the arithmetic.
+
+### Percentages with different denominators
+"Antibiotics within 1 hour" is **33% of treated patients** (259 of 776) in the waiting-time views, and **26% of all patients** (259 of 995) in the care bundle. Same 259 patients, different denominators, labelled on screen.
+
+## Predictive intelligence, honestly
+The model answers: *will the first antibiotics be given more than 1 hour after registration?* Rules that keep it honest:
+
+* **Leakage control:** only information available at the chosen prediction point is used (`src/delay_features.py`); lab results, the diagnosis code, test-order flags and the infusion flag are forbidden and guarded by tests.
+* **Validation:** patient-level 5-fold cross-validation, an 80/20 hold-out, a temporal split, and a do-nothing baseline; precision, recall, F1, ROC-AUC and PR-AUC; class weights for imbalance.
+* **Result:** no usable signal at registration, a weak signal at sepsis triage. Full tables are in [docs/model_evaluation.md](docs/model_evaluation.md), generated from `reports/delay_model_evaluation.csv`.
+* **Explanations:** SHAP shows what drives the model (at triage, waiting longer for triage predicts a longer wait for antibiotics). It explains the model, not causes.
+
+This is a research demonstration, not a clinical tool.
+
+## Quick start
+```powershell
+python -m venv .venv
+.venv\Scripts\Activate.ps1            # Git Bash: source .venv/Scripts/activate
+pip install -r requirements.txt
+winget install Graphviz.Graphviz      # only needed to redraw the process maps
+
+python src/download_data.py           # fetch the raw event log into data/raw/
+python src/clean_data.py              # clean it
+python src/prepare_log.py             # prepare it for process mining
+
+streamlit run app.py                  # open the dashboard
+```
+`src/discovery.py` finds Graphviz in `C:\Program Files\Graphviz\bin` even if it is not on your PATH. The first start of the Predictive tab trains the models (about 30 seconds) and caches them in `data/processed/`.
+
+## The pipeline
+Each script writes to `data/processed/` (not committed) or `reports/`.
+
+| # | Script | What it does | Main outputs |
+|---|---|---|---|
+| 1 | [src/download_data.py](src/download_data.py) | Downloads the Sepsis event log | `data/raw/sepsis.xes` |
+| 2 | [src/load_data.py](src/load_data.py) | Loads the XES file into a table | (used by later steps) |
+| 3 | [src/clean_data.py](src/clean_data.py) | Removes duplicates and 55 impossible cases, fills case details | `sepsis_clean.csv`, [data quality report](reports/data_quality_report.md) |
+| 4 | [src/prepare_log.py](src/prepare_log.py) | Fixes tie order, filters rare activities, adds waiting-time features | `sepsis_events.csv`, `sepsis_cases.csv`, [report](reports/event_log_preparation.md) |
+| 5 | [src/variants.py](src/variants.py) | Counts pathway variants at two levels of detail | [top variants](reports/top_variants.csv) |
+| 6 | [src/discovery.py](src/discovery.py) | Draws process maps and scores the models | [model evaluation](reports/model_evaluation.csv), maps in `reports/figures/` |
+| 7 | [src/bottlenecks.py](src/bottlenecks.py) | Measures waits between steps | [transitions table](reports/bottleneck_transitions.csv) |
+| 8 | [src/conformance.py](src/conformance.py) | Checks each patient against an expected sepsis pathway | [deviation summary](reports/conformance_summary.csv) |
+| 9 | [src/rework.py](src/rework.py) | Finds repeated steps, loops and return visits | [summary](reports/rework_summary.csv) |
+| 10 | [src/bundle.py](src/bundle.py) | Adapted care-bundle scorecard with control charts | [scorecard](reports/bundle_scorecard.csv) |
+| 11 | [src/handover.py](src/handover.py) | Department handovers and ward transfers | [handover pairs](reports/handover_pairs.csv) |
+| 12 | [src/delay_model.py](src/delay_model.py) | Trains and validates the delay models | [evaluation](reports/delay_model_evaluation.csv) |
+
+Supporting modules: [delay_features](src/delay_features.py) (features and leakage guard), [explain](src/explain.py) (SHAP), [simulator](src/simulator.py), [insights](src/insights.py), [report](src/report.py) (PDF), [validation](src/validation.py) (input checks and count reconciliation). Read processed files with `load_clean_log()`, `load_events()` and `load_cases()`; one case ID is literally `NA`, which a plain `pd.read_csv` would turn into a missing value.
+
+### Notebooks
+Outputs are saved, so they can be read without re-running: [01 load](notebooks/01_load_data.ipynb), [02 EDA](notebooks/02_eda.ipynb), [03 variants](notebooks/03_variants.ipynb), [04 process discovery](notebooks/04_process_discovery.ipynb), [05 bottlenecks](notebooks/05_bottlenecks.ipynb), [06 conformance](notebooks/06_conformance.ipynb), [07 rework](notebooks/07_rework.ipynb), [08 care bundle](notebooks/08_bundle_scorecard.ipynb), [09 departments](notebooks/09_department_handover.ipynb).
+
+## Testing and quality
+```powershell
+python -m pytest -q
+```
+87 tests cover the leakage guard and features, model training and validation (including a planted-signal test and a pure-noise test), SHAP, the simulator (never makes waits longer, monotonic), every insight rule, PDF generation, count reconciliation, and real-data checks (995 patients, 14,214 and 14,208 events, 329 conforming patients, the denominators above) plus a render check of every dashboard page, the sidebar menu structure, and each patient filter. Tests that need the real data skip themselves when it is missing.
+
+* **GitHub Actions** ([.github/workflows/ci.yml](.github/workflows/ci.yml)) compiles everything and runs the tests on every push; a best-effort job downloads the real dataset and runs the integration tests too.
+* **Docker** ([Dockerfile](Dockerfile), [docker/entrypoint.sh](docker/entrypoint.sh)): `docker build -t careflow .` then `docker run -p 8501:8501 careflow`. The first start downloads the dataset and builds the processed data. The Docker files have been written but not built or run yet.
 
 ## Project structure
 ```
 careflow/
-├── app.py                 # Streamlit dashboard
-├── assets/style.css       # dashboard stylesheet
-├── data/
-│   ├── raw/               # original event log (not committed)
-│   └── processed/         # cleaned and prepared logs (not committed)
-├── docs/
-│   └── data_dictionary.md # columns, activities, case/activity/timestamp mapping
-├── notebooks/             # five analysis notebooks
-├── reports/
-│   ├── figures/           # charts and process maps
-│   └── *.md, *.csv        # quality report, variants, model scores, waiting times
-├── src/                   # pipeline code (load, clean, prepare, variants, discovery, bottlenecks, ui)
-├── .streamlit/config.toml # dashboard theme
-├── pyrightconfig.json     # tells VS Code where src/ is
-└── requirements.txt
+├── app.py                    # page set-up and page flow
+├── dashboard/                # sidebar menu (4 groups, 10 pages), filters, data context, one module per page
+│   └── tabs/
+├── src/                      # pipeline, analytics, ML, simulator, insights, report
+├── tests/                    # pytest suite (synthetic data + real-data checks)
+├── assets/style.css          # dashboard stylesheet
+├── data/                     # raw and processed data (not committed)
+├── docs/                     # data dictionary, model evaluation, architecture diagram
+├── notebooks/                # nine analysis notebooks
+├── reports/                  # quality reports, tables, figures
+├── .github/workflows/ci.yml
+├── Dockerfile, docker/, .dockerignore
+└── requirements.txt, pytest.ini
 ```
 
 ## Dataset
 *Sepsis Cases - Event Log* (Mannhardt, 2016, 4TU.ResearchData, DOI 10.4121/uuid:915d2bfb-7e84-49ad-a286-dc35f063a460): real, anonymised hospital data. See [docs/data_dictionary.md](docs/data_dictionary.md).
 
-## Limitations and open questions
-- The dataset is public research data, not data supplied by the company.
-- The care-bundle scorecard is adapted from the hour-1 bundle using only what the log records; it is not an official quality measure (the clock starts at ER registration, and blood cultures and vasopressors are not recorded).
-- Department codes are anonymised; roles such as Laboratory or Ward are inferred from the steps each department records.
-- The expected sepsis pathway used for conformance checking is an assumption (the standard route in the data plus the usual care sequence); a different definition gives different conformance numbers.
+## Limitations
+- A public research dataset from one hospital, not data supplied by the company; timestamps were entered retrospectively.
 - 26% of patients have no discharge event, and the reason is not in the data.
-- `Admission NC` is recorded more than once for many patients (320 immediate repeats); transfers or repeated records are both possible.
-- IV fluid and antibiotics are often recorded at the same moment, so they may be entered together rather than given together.
-- Process-model scores involve a trade-off: the heuristics model is the most precise (0.94) but only 15% of cases replay perfectly, while the inductive model with noise filtering replays 61%.
+- The expected pathway (conformance) and the care-bundle scorecard are adapted for this project; they are not official clinical measures. The antibiotic clock starts at ER registration because the log has no time of sepsis recognition.
+- Department codes are anonymised; roles such as Laboratory or Ward are inferred from the steps each department records.
+- The delay model has no skill at registration and only weak skill at triage. SHAP explains the model, not causes. The simulator is arithmetic on recorded waits, not a forecast.
+- Nothing in this project is clinical advice.
 
-## Status
-- [x] Project setup, dataset and data dictionary
-- [x] Data loading and cleaning
-- [x] Exploratory data analysis
-- [x] Event log preparation
-- [x] Variant analysis
-- [x] Process discovery and model evaluation
-- [x] Bottleneck analysis
-- [x] Interactive dashboard
-- [x] Conformance checking against an expected sepsis pathway ([src/conformance.py](src/conformance.py), [notebook](notebooks/06_conformance.ipynb)); the expected pathway is an assumption to confirm with the mentor
-- [x] Rework and loop analysis ([src/rework.py](src/rework.py), [notebook](notebooks/07_rework.ipynb))
-- [x] Care-bundle scorecard with control charts ([src/bundle.py](src/bundle.py), [notebook](notebooks/08_bundle_scorecard.ipynb))
-- [x] Department handover network ([src/handover.py](src/handover.py), [notebook](notebooks/09_department_handover.ipynb))
-- [ ] Final report, presentation and demo
+## Roadmap
+- [x] Cleaning, preparation, pathways, process maps, bottlenecks
+- [x] Conformance, rework, care bundle with control charts, department handovers
+- [x] Ten-tab dashboard with validated, consistent filters and denominators
+- [x] Leakage-controlled delay prediction with SHAP, what-if simulator, rule-based insights, PDF reports
+- [x] Tests, GitHub Actions, Docker configuration, architecture diagram
+- [ ] Confirm the expected pathway and bundle definitions with the mentor
+- [ ] Build and run the Docker image
+- [ ] Final project report and presentation

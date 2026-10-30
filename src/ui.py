@@ -58,16 +58,28 @@ def sidebar_brand() -> None:
     )
 
 
+def page_header(title: str, subtitle: str, filters_text: str) -> None:
+    """Compact header for every page except the Overview (which has the full banner)."""
+    st.markdown(
+        f'<div class="pagehead"><div class="pagehead-title">{html.escape(title)}</div>'
+        f'<div class="pagehead-sub">{html.escape(subtitle)}</div>'
+        f'<div class="pagehead-chip">Patients: {html.escape(filters_text)}</div></div>',
+        unsafe_allow_html=True,
+    )
+
+
 def sidebar_title(text: str) -> None:
     st.sidebar.markdown(f'<div class="side-title">{html.escape(text)}</div>', unsafe_allow_html=True)
 
 
-def selected_box(selected: int, total: int) -> None:
+def selected_box(selected: int, total: int, note: str = "") -> None:
+    """The selected-patient counter. Call it inside the container where it should appear."""
     width = selected / total * 100 if total else 0
-    st.sidebar.markdown(
+    note_html = f'<div class="selected-note">{html.escape(note)}</div>' if note else ""
+    st.markdown(
         f'<div class="selected"><div class="selected-label">Patients selected</div>'
         f'<div class="selected-value">{selected:,} <span>of {total:,}</span></div>'
-        f'<div class="selected-bar"><div style="width:{width:.1f}%"></div></div></div>',
+        f'<div class="selected-bar"><div style="width:{width:.1f}%"></div></div>{note_html}</div>',
         unsafe_allow_html=True,
     )
 

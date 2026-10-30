@@ -1,0 +1,7 @@
+group,patients,delayed_patients,observed_delay_rate_pct,stage,model
+Lower risk,259,177,68.34,registration,Random forest
+Medium risk,258,166,64.34,registration,Random forest
+Higher risk,259,174,67.18,registration,Random forest
+Lower risk,258,158,61.24,triage,XGBoost
+Medium risk,258,172,66.67,triage,XGBoost
+Higher risk,259,187,72.2,triage,XGBoost
