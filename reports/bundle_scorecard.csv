@@ -1,0 +1,7 @@
+element,label,applicable,met,met_pct
+lactate_1h,Lactate measured within 1 hour,995,758,76.18
+antibiotics_1h,Antibiotics within 1 hour,995,259,26.03
+antibiotics_3h,Antibiotics within 3 hours,995,558,56.08
+fluid_3h,IV fluid within 3 hours (patients with hypotension),49,37,75.51
+repeat_lactate,Lactate measured again (first lactate above 2),285,102,35.79
+complete_bundle,All applicable elements met,995,183,18.39

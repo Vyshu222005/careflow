@@ -1,0 +1,27 @@
+department,role,label,events,patients,top_step,share_of_events_pct
+B,Laboratory,B: Laboratory,7507,958,Leucocytes,52.81
+A,ER team,A: ER team,3272,933,ER Registration,23.02
+C,Triage,C: Triage,998,995,ER Triage,7.02
+E,Discharge,E: Discharge,739,739,Release A,5.2
+?,Return (unit not recorded),?: Return (unit not recorded),278,278,Return ER,1.96
+L,ER team,L: ER team,205,62,ER Registration,1.44
+F,Ward,F: Ward,202,189,Admission NC,1.42
+O,Ward,O: Ward,173,167,Admission NC,1.22
+G,Ward,G: Ward,138,137,Admission NC,0.97
+I,Ward,I: Ward,118,111,Admission NC,0.83
+M,Ward,M: Ward,84,82,Admission NC,0.59
+Q,Ward,Q: Ward,63,62,Admission NC,0.44
+R,Ward,R: Ward,56,53,Admission NC,0.39
+P,Ward,P: Ward,51,50,Admission IC,0.36
+H,Ward,H: Ward,50,46,Admission NC,0.35
+W,Ward,W: Ward,49,48,Admission IC,0.34
+N,Ward,N: Ward,42,39,Admission NC,0.3
+D,Ward,D: Ward,41,40,Admission NC,0.29
+T,Ward,T: Ward,32,28,Admission NC,0.23
+S,Ward,S: Ward,31,29,Admission NC,0.22
+J,Ward,J: Ward,25,21,Admission NC,0.18
+V,Ward,V: Ward,24,23,Admission NC,0.17
+K,Ward,K: Ward,17,17,Admission NC,0.12
+U,Ward,U: Ward,17,17,Admission NC,0.12
+X,Ward,X: Ward,1,1,Admission NC,0.01
+Y,Ward,Y: Ward,1,1,Admission NC,0.01

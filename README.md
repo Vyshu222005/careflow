@@ -25,6 +25,8 @@ Cleaned data: **995 patients, 14,208 events, 15 activities** (from 1,050 patient
 | Where time goes | about 80% of in-hospital time is on the ward; waits between ER steps are under 5% |
 | Return visits | 28% of patients return to the ER, a median of 46.5 days after discharge |
 | Missing endings | 26% of patients have no discharge event recorded |
+| Care bundle | Only 18% of patients receive every applicable early sepsis care element on time (adapted hour-1 bundle): lactate within 1 hour 76%, antibiotics within 1 hour 26%. A control chart shows care is stable but low, not improving (only Jan 2014 is outside the limits) |
+| Departments | 26 anonymised departments (one laboratory records 53% of events); 6,642 handovers. 89% of repeated ward records are recorded by a different unit than the previous record, so they are mostly transfers, not duplicates |
 | Rework | 30% of patients repeat a step, almost always the ward admission record (294 patients); true loops are rare (38 patients). 37.6% of discharged patients return, 15% within 30 days |
 | Conformance | 33% of patients follow the assumed expected pathway exactly (average fitness 0.90); the largest deviation pattern is an extra `Admission NC` record (20% of patients) |
 
@@ -59,6 +61,8 @@ Run the scripts in this order. Each writes its results to `data/processed/` (not
 | 7 | [src/bottlenecks.py](src/bottlenecks.py) | Measures waits between steps | [transitions table](reports/bottleneck_transitions.csv), performance map |
 | 8 | [src/conformance.py](src/conformance.py) | Checks each patient against an expected sepsis pathway | `sepsis_conformance.csv`, [deviation summary](reports/conformance_summary.csv), [patterns](reports/conformance_patterns.csv) |
 | 9 | [src/rework.py](src/rework.py) | Finds repeated steps, loops and return visits | `sepsis_rework.csv`, [repeated steps](reports/rework_steps.csv), [summary](reports/rework_summary.csv) |
+| 10 | [src/bundle.py](src/bundle.py) | Scores an adapted sepsis care bundle and draws monthly control charts | `sepsis_bundle.csv`, [scorecard](reports/bundle_scorecard.csv), [monthly trend](reports/bundle_trend.csv) |
+| 11 | [src/handover.py](src/handover.py) | Finds which departments hand over to which, and what the ward transfers are | [workload](reports/department_workload.csv), [handover pairs](reports/handover_pairs.csv), [ward transfers](reports/ward_transfers.csv) |
 
 Read the processed files with `load_clean_log()` ([src/clean_data.py](src/clean_data.py)) and `load_events()` / `load_cases()` ([src/prepare_log.py](src/prepare_log.py)). One case ID is literally `NA`, which a plain `pd.read_csv` would turn into a missing value.
 
@@ -74,12 +78,14 @@ Each notebook has its outputs saved, so it can be read without re-running.
 | [05_bottlenecks](notebooks/05_bottlenecks.ipynb) | Waiting times, time to antibiotics, where the time goes |
 | [06_conformance](notebooks/06_conformance.ipynb) | Conformance to the expected pathway: fitness, deviations, patterns |
 | [07_rework](notebooks/07_rework.ipynb) | Repeated steps, loops, ward records and return visits |
+| [08_bundle_scorecard](notebooks/08_bundle_scorecard.ipynb) | Adapted sepsis care-bundle scorecard and monthly control charts |
+| [09_department_handover](notebooks/09_department_handover.ipynb) | Department workload, handover network and ward transfers |
 
 ## Dashboard
 ```bash
 streamlit run app.py
 ```
-Seven tabs, all driven by the sidebar filters (registration dates, how the case ended, age group, returned to the ER):
+Nine tabs, all driven by the sidebar filters (registration dates, how the case ended, age group, returned to the ER):
 
 | Tab | What it shows |
 |---|---|
@@ -89,6 +95,8 @@ Seven tabs, all driven by the sidebar filters (registration dates, how the case 
 | Waiting times | Time to antibiotics against the 1-hour and 3-hour marks, waits between ER steps, all transitions |
 | Conformance | How closely patients follow the expected pathway: fitness, deviations, deviation patterns |
 | Rework | Repeated steps, gaps between repeated ward records, ward stay, and how soon patients return |
+| Care bundle | Scorecard of early sepsis care elements and a monthly control chart (is care improving?) |
+| Departments | Handover network between departments, workload, and moves between ward units |
 | About | Data source, method, and how to read the numbers |
 
 The charts and logic are in [app.py](app.py). The look is defined in [assets/style.css](assets/style.css) (stylesheet) and [src/ui.py](src/ui.py) (HTML for the banner and cards).
@@ -118,6 +126,8 @@ careflow/
 
 ## Limitations and open questions
 - The dataset is public research data, not data supplied by the company.
+- The care-bundle scorecard is adapted from the hour-1 bundle using only what the log records; it is not an official quality measure (the clock starts at ER registration, and blood cultures and vasopressors are not recorded).
+- Department codes are anonymised; roles such as Laboratory or Ward are inferred from the steps each department records.
 - The expected sepsis pathway used for conformance checking is an assumption (the standard route in the data plus the usual care sequence); a different definition gives different conformance numbers.
 - 26% of patients have no discharge event, and the reason is not in the data.
 - `Admission NC` is recorded more than once for many patients (320 immediate repeats); transfers or repeated records are both possible.
@@ -135,4 +145,6 @@ careflow/
 - [x] Interactive dashboard
 - [x] Conformance checking against an expected sepsis pathway ([src/conformance.py](src/conformance.py), [notebook](notebooks/06_conformance.ipynb)); the expected pathway is an assumption to confirm with the mentor
 - [x] Rework and loop analysis ([src/rework.py](src/rework.py), [notebook](notebooks/07_rework.ipynb))
+- [x] Care-bundle scorecard with control charts ([src/bundle.py](src/bundle.py), [notebook](notebooks/08_bundle_scorecard.ipynb))
+- [x] Department handover network ([src/handover.py](src/handover.py), [notebook](notebooks/09_department_handover.ipynb))
 - [ ] Final report, presentation and demo

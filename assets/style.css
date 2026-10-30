@@ -91,14 +91,14 @@ header[data-testid="stHeader"] { background: transparent; }
 }
 
 /* ---------- tabs as pills ---------- */
-[role="tablist"] { gap: .5rem; padding: .2rem .2rem .8rem; }
+[role="tablist"] { gap: .35rem; padding: .2rem .2rem .8rem; }
 [role="tablist"]::after { display: none; }
 [role="tabpanel"], [role="tabpanel"]:focus, [role="tabpanel"]:focus-visible, [role="tabpanel"][data-focus-visible] { outline: none; box-shadow: none; }
 [role="tab"] {
-  height: auto; padding: .5rem 1.2rem; border-radius: 999px; background: #fff; border: 1px solid var(--line);
+  height: auto; padding: .42rem .85rem; border-radius: 999px; background: #fff; border: 1px solid var(--line);
   color: var(--ink-soft); transition: background-color .15s, border-color .15s;
 }
-[role="tab"] p { margin: 0; font-size: .92rem; font-weight: 600; color: inherit; }
+[role="tab"] p { margin: 0; font-size: .85rem; font-weight: 600; color: inherit; }
 [role="tab"] .react-aria-SelectionIndicator { display: none; }
 [role="tab"][aria-selected="false"]:hover { border-color: var(--blue); color: var(--blue-dark); }
 [role="tab"][aria-selected="true"] { background: var(--blue); border-color: var(--blue); color: #fff; box-shadow: 0 4px 10px rgba(42,120,214,.28); }

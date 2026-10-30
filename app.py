@@ -24,7 +24,9 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from pm4py.visualization.dfg import visualizer as dfg_visualizer  # noqa: E402
 
+import bundle  # noqa: E402
 import conformance  # noqa: E402
+import handover  # noqa: E402
 import rework  # noqa: E402
 import ui  # noqa: E402
 from bottlenecks import (  # noqa: E402
@@ -66,6 +68,11 @@ def load_conformance_rework():
     return log, conformance_table, rework_table
 
 
+@st.cache_data(show_spinner="Scoring the care bundle...")
+def load_bundle_table():
+    return bundle.bundle_table(conformance.load_log())
+
+
 def style(fig: go.Figure, height: int = 340, top: int = 8) -> go.Figure:
     """Shared chart look: transparent background, light grid, soft text."""
     fig.update_layout(
@@ -99,6 +106,7 @@ if not (EVENTS_PATH.exists() and CASES_PATH.exists() and CLEAN_PATH.exists()):
 
 events_all, cases_all = load_data()
 clean_log, conformance_all, rework_all = load_conformance_rework()
+bundle_all = load_bundle_table()
 
 # ---------- sidebar: brand and filters ----------
 first_day, last_day = cases_all["start_date"].min(), cases_all["start_date"].max()
@@ -158,8 +166,8 @@ antibiotics = target_summary(hours["IV Antibiotics"])
 milestone_table = variant_table(cases, "milestone_variant")
 has_abx = antibiotics["cases"] > 0
 
-tab_overview, tab_paths, tab_map, tab_wait, tab_conf, tab_rework, tab_about = st.tabs(
-    ["Overview", "Pathways", "Process map", "Waiting times", "Conformance", "Rework", "About"]
+tab_overview, tab_paths, tab_map, tab_wait, tab_conf, tab_rework, tab_bundle, tab_depts, tab_about = st.tabs(
+    ["Overview", "Pathways", "Process map", "Waiting times", "Conformance", "Rework", "Care bundle", "Departments", "About"]
 )
 
 # ---------- overview ----------
@@ -532,6 +540,180 @@ with tab_rework:
             show(style(fig, 340))
             st.caption(f"{len(returns):,} of {released:,} discharged patients return; the median is {returns['days_to_return'].median():.1f} days after discharge.")
 
+# ---------- care bundle ----------
+with tab_bundle:
+    ui.callout(
+        "<b>How many patients get the key early sepsis care on time, and is it changing?</b> The scorecard is <b>adapted</b> from the "
+        "Surviving Sepsis Campaign hour-1 bundle using only what the log records. It is <b>not an official quality measure</b>: the clock "
+        "starts at ER registration, and blood cultures and vasopressors are not recorded."
+    )
+    bt = bundle_all[bundle_all[CASE_ID].isin(cases[CASE_ID])]
+    card_table = bundle.scorecard(bt).set_index("element")
+
+    def pct_text(element: str) -> str:
+        row = card_table.loc[element]
+        return f"{row['met_pct']:.0f}%" if row["applicable"] else "n/a"
+
+    columns = st.columns(4)
+    ui.kpi(columns[0], "Complete bundle", pct_text("complete_bundle"), "every applicable element on time", "check")
+    ui.kpi(columns[1], "Lactate in 1 hour", pct_text("lactate_1h"), "measured within an hour", "drop")
+    ui.kpi(columns[2], "Antibiotics in 1 hour", pct_text("antibiotics_1h"), "of all selected patients", "clock")
+    ui.kpi(columns[3], "IV fluid in 3 hours", pct_text("fluid_3h"),
+           f"of {int(card_table.loc['fluid_3h', 'applicable'])} patients with hypotension", "heart")
+
+    ui.spacer(1.0)
+    with st.container(key="card_bundle_score"):
+        ui.section("Scorecard", "Share of patients each element applies to. Hover for the numbers.")
+        score = card_table.reset_index().iloc[::-1]
+        fig = go.Figure(go.Bar(
+            x=score["met_pct"], y=score["label"], orientation="h", marker_color=BLUE, customdata=list(zip(score["met"], score["applicable"])),
+            hovertemplate="%{y}<br>%{x:.0f}% (%{customdata[0]} of %{customdata[1]} patients)<extra></extra>",
+        ))
+        fig.update_xaxes(title="Share of patients (%)", range=[0, 100])
+        fig.update_yaxes(automargin=True)
+        show(style(fig, 330))
+
+    ui.spacer(1.0)
+    with st.container(key="card_bundle_trend"):
+        ui.section("Is care improving? Monthly control chart",
+                   "Dashed line: the overall average. Grey lines: control limits. A month is flagged only when it differs by more than chance would explain.")
+        labels_by_element = {e: bundle.ELEMENTS[e][0] for e in bundle.TREND_ELEMENTS}
+        chosen = st.selectbox("Element", list(labels_by_element), format_func=labels_by_element.get)
+        chart = bundle.control_chart(bt, chosen)
+        if chart.empty:
+            st.info(f"Not enough patients per month (at least {bundle.MIN_MONTH_N}) in this selection to draw a control chart.")
+        else:
+            months = pd.to_datetime(chart["month"] + "-01").dt.strftime("%b %y").tolist()
+            fig = go.Figure()
+            for column, name, show_legend in (("ucl", "Control limits", True), ("lcl", "Control limits", False)):
+                fig.add_trace(go.Scatter(x=months, y=chart[column], mode="lines", line=dict(color="#98a2b3", width=1.2, shape="hv"),
+                                         name=name, showlegend=show_legend, hoverinfo="skip"))
+            fig.add_trace(go.Scatter(x=months, y=[chart["center"].iloc[0]] * len(chart), mode="lines", line=dict(color=INK_SOFT, dash="dash", width=1.2),
+                                     name=f"Average ({chart['center'].iloc[0]:.0f}%)", hoverinfo="skip"))
+            fig.add_trace(go.Scatter(
+                x=months, y=chart["pct"], mode="lines+markers", name="Monthly rate", line=dict(color=BLUE, width=2.5), marker=dict(size=8),
+                customdata=list(zip(chart["met"], chart["n"])),
+                hovertemplate="%{x}: %{y:.0f}% (%{customdata[0]} of %{customdata[1]} patients)<extra></extra>",
+            ))
+            flagged = chart[chart["signal"] != ""]
+            if not flagged.empty:
+                fig.add_trace(go.Scatter(
+                    x=[months[i] for i in flagged.index], y=flagged["pct"], mode="markers+text", name="Signal", text=flagged["signal"],
+                    textposition="top center", marker=dict(color="#eb6834", size=13, line=dict(color="white", width=2)),
+                    hovertemplate="%{x}: %{y:.0f}%<br>%{text}<extra></extra>",
+                ))
+            fig.update_xaxes(type="category", tickangle=-45)
+            fig.update_yaxes(range=[0, 100], title="Patients meeting the element (%)")
+            fig = style(fig, 400, top=44)
+            fig.update_layout(showlegend=True, legend=dict(orientation="h", yanchor="bottom", y=1.02, x=0))
+            show(fig)
+            if flagged.empty:
+                st.caption("No signals: the month-to-month changes are what chance alone would produce.")
+            else:
+                st.caption("Signals: " + "; ".join(f"{m} ({s})" for m, s in zip(flagged['month'], flagged['signal'])) + f". Months with fewer than {bundle.MIN_MONTH_N} patients are left out.")
+
+    with st.expander("How the elements are defined"):
+        st.markdown(
+            "- **Lactate in 1 hour / antibiotics in 1 hour:** within 1 hour of ER registration, for all patients (antibiotics in 3 hours is the looser reference).\n"
+            "- **IV fluid in 3 hours:** only for patients with the hypotension flag.\n"
+            "- **Lactate measured again:** only for patients whose first lactate value is above 2.\n"
+            "- **Complete bundle:** the patient meets every element that applies to them.\n"
+            "- The control limits are the overall rate plus or minus 3 standard errors; a run of 8 months on one side of the average is also flagged."
+        )
+        st.download_button("Download the per-patient results (CSV)", bt.to_csv(index=False), "care_bundle.csv", "text/csv")
+
+# ---------- departments ----------
+with tab_depts:
+    ui.callout(
+        "<b>Which departments handle patients, and who hands over to whom?</b> The log records the department for each step. The codes are "
+        "anonymised, so each department's <b>role</b> is inferred from the steps it records (a department that only records blood tests is shown "
+        "as Laboratory). Roles are an interpretation, not official names."
+    )
+    log_d = clean_log[clean_log[CASE_ID].isin(cases[CASE_ID])]
+    dept = handover.department_table(log_d)
+    hov = handover.handover_events(log_d)
+    transfers = handover.ward_transfers(log_d)
+    transitions = int(log_d.groupby(CASE_ID).size().sub(1).sum())
+    changed_share = transfers["changed_department"].mean() * 100 if len(transfers) else None
+
+    columns = st.columns(4)
+    ui.kpi(columns[0], "Departments", f"{len(dept):,}", f"{int((dept['role'] == 'Ward').sum())} of them ward units", "users")
+    ui.kpi(columns[1], "Handovers", f"{len(hov):,}", f"{len(hov) / max(transitions, 1) * 100:.0f}% of step-to-step moves", "repeat")
+    ui.kpi(columns[2], "Busiest department", dept.iloc[0]["department"], f"{dept.iloc[0]['role']}, {dept.iloc[0]['share_of_events_pct']:.0f}% of events", "list")
+    ui.kpi(columns[3], "Ward records that move",
+           f"{changed_share:.0f}%" if changed_share is not None else "n/a", f"of {len(transfers):,} repeated ward records change unit", "route")
+
+    ui.spacer(1.0)
+    with st.container(key="card_dept_network"):
+        ui.section("Handover network", "Arrows show handovers between departments; the number is how many times. Wider arrows mean more handovers.")
+        controls = st.columns([1.2, 1.6])
+        level = controls[0].radio("Level of detail", ["By role (simple)", "By department (12 busiest)"], horizontal=True)
+        min_handovers = controls[1].slider("Smallest handover count shown", 5, 300, 20, step=5)
+        if hov.empty:
+            st.info("No handovers in this selection.")
+        else:
+            if level.startswith("By role"):
+                pairs = handover.handover_pairs(hov, roles=dept.set_index("department")["role"])
+                nodes = handover.role_nodes(dept)
+            else:
+                nodes = handover.department_nodes(dept, top=12)
+                pairs = handover.handover_pairs(hov)
+                pairs = pairs[pairs["from_department"].isin(nodes["node"]) & pairs["to_department"].isin(nodes["node"])]
+            dot = handover.network_dot(pairs, nodes, min_handovers=min_handovers)
+            st.graphviz_chart(dot, width="stretch")
+            st.caption("Colours show the inferred role: blue ER team, light blue triage, green laboratory, orange ward, grey discharge and return. "
+                       "The loop on Ward is patients moving from one ward unit to another.")
+
+    ui.spacer(1.0)
+    left, right = st.columns(2)
+    with left, st.container(key="card_dept_workload"):
+        ui.section("Events per department", "The ten busiest departments.")
+        top = dept.head(10).iloc[::-1]
+        fig = go.Figure(go.Bar(
+            x=top["events"], y=top["label"], orientation="h", marker_color=BLUE, customdata=list(zip(top["patients"], top["share_of_events_pct"])),
+            hovertemplate="%{y}<br>%{x:,} events (%{customdata[1]:.1f}%), %{customdata[0]} patients<extra></extra>",
+        ))
+        fig.update_xaxes(title="Events")
+        fig.update_yaxes(automargin=True)
+        show(style(fig, 360))
+    with right, st.container(key="card_dept_transfers"):
+        ui.section("Moves between ward units", "Repeated ward records that are recorded by a different unit than the previous one.")
+        moves = transfers[transfers["changed_department"]]
+        if moves.empty:
+            st.info("No repeated ward records that change unit in this selection.")
+        else:
+            top_moves = (moves.groupby(["previous_department", "department"]).agg(transfers=("gap_hours", "size"), median_gap=("gap_hours", "median"))
+                         .reset_index().sort_values("transfers", ascending=False).head(8))
+            top_moves["route"] = top_moves["previous_department"] + " → " + top_moves["department"]
+            top_moves = top_moves.iloc[::-1]
+            fig = go.Figure(go.Bar(
+                x=top_moves["transfers"], y=top_moves["route"], orientation="h", marker_color=BLUE, customdata=top_moves["median_gap"],
+                hovertemplate="%{y}: %{x} moves, median %{customdata:.0f} h between the records<extra></extra>",
+            ))
+            fig.update_xaxes(title="Moves")
+            fig.update_yaxes(automargin=True)
+            show(style(fig, 360))
+            st.caption(f"{len(moves):,} of {len(transfers):,} repeated ward records ({changed_share:.0f}%) move to a different unit, a median of "
+                       f"{moves['gap_hours'].median():.0f} hours after the previous record. They look like transfers, not duplicate entries.")
+
+    ui.spacer(1.0)
+    with st.container(key="card_dept_slow"):
+        ui.section("Slowest handovers")
+        slow = handover.handover_pairs(hov)
+        slow = slow[slow["handovers"] >= 30].sort_values("median_wait_hours", ascending=False).head(8)
+        if slow.empty:
+            st.info("No pair of departments has enough handovers in this selection.")
+        else:
+            labels_by_department = dept.set_index("department")["label"]
+            view = pd.DataFrame({
+                "From": slow["from_department"].map(labels_by_department), "To": slow["to_department"].map(labels_by_department),
+                "Handovers": slow["handovers"], "Median wait": slow["median_wait_hours"].map(format_hours),
+                "90th percentile": slow["p90_wait_hours"].map(format_hours),
+            })
+            st.dataframe(view, hide_index=True, width="stretch")
+            st.caption("Pairs of departments with at least 30 handovers, by median wait between the two events. "
+                       "Waits involving the laboratory mostly reflect testing rhythm.")
+
 # ---------- about ----------
 with tab_about:
     left, right = st.columns(2)
@@ -555,7 +737,8 @@ with tab_about:
             "- 26% of patients have no discharge event recorded; the reason is not in the data.\n"
             "- IV fluid and antibiotics are often recorded at the same moment, so they may be entered together rather than given together.\n"
             "- **Conformance** compares each patient with an expected pathway that is an assumption, to be confirmed with the mentor.\n"
-            "- **Rework** is mostly repeated ward admission records; true loops back to an earlier step are rare."
+            "- **Rework** is mostly repeated ward admission records; true loops back to an earlier step are rare.\n"
+            "- **Care bundle** is an adapted scorecard, not an official quality measure; **Departments** use anonymised codes with inferred roles."
         )
 
 ui.footer("CareFlow: clinical pathway process mining. Data: Sepsis Cases event log (4TU.ResearchData).")
