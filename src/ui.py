@@ -50,14 +50,6 @@ def hero(subtitle: str, chips: list) -> None:
     )
 
 
-def sidebar_brand() -> None:
-    st.sidebar.markdown(
-        f'<div class="side-brand"><div class="side-logo">{icon("pulse")}</div>'
-        f'<div><div class="side-name">CareFlow</div><div class="side-tag">Sepsis pathway analytics</div></div></div>',
-        unsafe_allow_html=True,
-    )
-
-
 def page_header(title: str, subtitle: str, filters_text: str) -> None:
     """Compact header for every page except the Overview (which has the full banner)."""
     st.markdown(
@@ -66,10 +58,6 @@ def page_header(title: str, subtitle: str, filters_text: str) -> None:
         f'<div class="pagehead-chip">Patients: {html.escape(filters_text)}</div></div>',
         unsafe_allow_html=True,
     )
-
-
-def sidebar_title(text: str) -> None:
-    st.sidebar.markdown(f'<div class="side-title">{html.escape(text)}</div>', unsafe_allow_html=True)
 
 
 def selected_box(selected: int, total: int, note: str = "") -> None:

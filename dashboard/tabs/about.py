@@ -40,6 +40,8 @@ def render(ctx) -> None:
         st.markdown(
             "- Waits are medians over retrospective timestamps. They show where delays happen, not why.\n"
             "- **Clinical steps** leave out repeated lab tests (Leucocytes, CRP, LacticAcid).\n"
+            "- **Release A to E** are anonymised discharge codes: the way a stay ended. The data does not say what each letter stands for. "
+            "Release A is the most common; 'No release recorded' means no discharge event exists.\n"
             "- Antibiotic timing is measured from **ER registration**. The log has no time of sepsis recognition, so the true share treated in time is probably higher.\n"
             "- 'Treated within 1 hour' is a share of patients **with antibiotics recorded**; the care bundle counts **all** patients, so the two figures differ on purpose."
         )
