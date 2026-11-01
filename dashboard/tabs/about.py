@@ -60,6 +60,18 @@ def render(ctx) -> None:
             "- SHAP explains what the **model** does, not what causes a delay. The simulator is arithmetic, not a forecast.\n"
             "- Nothing here is clinical advice."
         )
+        ui.section("Glossary")
+        st.markdown(
+            "- **Event log:** a table with one row per recorded step: patient, activity and time.\n"
+            "- **Pathway:** the ordered steps one patient went through.\n"
+            "- **Bottleneck:** a step where patients wait a long time before the next one.\n"
+            "- **Conformance:** comparing real pathways with the expected pathway.\n"
+            "- **Fitness:** how well a pathway matches the expected one; 1.0 is an exact match.\n"
+            "- **Care bundle:** a checklist of recommended sepsis care steps that should happen on time.\n"
+            "- **Handover:** a patient moving from one department to another.\n"
+            "- **Median:** the middle value; half of the patients wait less, half wait more.\n"
+            "- **90th percentile:** 9 in 10 patients wait less than this."
+        )
         ui.section("References")
         st.markdown(
             "- Mannhardt, F. (2016). *Sepsis Cases - Event Log.* 4TU.ResearchData. doi:10.4121/uuid:915d2bfb-7e84-49ad-a286-dc35f063a460\n"
