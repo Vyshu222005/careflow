@@ -142,13 +142,14 @@ careflow/
 - 26% of patients have no discharge event, and the reason is not in the data.
 - The expected pathway (conformance) and the care-bundle scorecard are adapted for this project; they are not official clinical measures. The antibiotic clock starts at ER registration because the log has no time of sepsis recognition.
 - Department codes are anonymised; roles such as Laboratory or Ward are inferred from the steps each department records.
+- Release A to E are anonymised discharge codes; the data does not say what each letter stands for, so they are only used to show how cases end.
 - The delay model has no skill at registration and only weak skill at triage. SHAP explains the model, not causes. The simulator is arithmetic on recorded waits, not a forecast.
 - Nothing in this project is clinical advice.
 
 ## Roadmap
 - [x] Cleaning, preparation, pathways, process maps, bottlenecks
 - [x] Conformance, rework, care bundle with control charts, department handovers
-- [x] Ten-tab dashboard with validated, consistent filters and denominators
+- [x] Ten-page dashboard with a left sidebar menu, collapsible patient filters, and validated, consistent denominators
 - [x] Leakage-controlled delay prediction with SHAP, what-if simulator, rule-based insights, PDF reports
 - [x] Tests, GitHub Actions, Docker configuration, architecture diagram
 - [ ] Confirm the expected pathway and bundle definitions with the mentor
