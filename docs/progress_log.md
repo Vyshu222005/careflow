@@ -14,7 +14,7 @@ Weekly summary of the work on CareFlow: Clinical Pathway Process Mining. Dates a
 - Analysed bottlenecks and built a performance map.
 - Built the first Streamlit dashboard.
 
-## Week 2: Quality analysis and dashboard (27 October to 3 November 2026)
+## Week 2: Quality analysis and dashboard (27 October to 2 November 2026)
 - Added conformance checking against the expected sepsis pathway.
 - Added rework and loop analysis: repeated steps and returns to the ER.
 - Added the conformance and rework pages to the dashboard.
@@ -24,7 +24,6 @@ Weekly summary of the work on CareFlow: Clinical Pathway Process Mining. Dates a
 - Added input validation, 87 automated tests, GitHub Actions and Docker configuration.
 - Documented the project: README, architecture diagram, model evaluation, glossary and notes on the Release codes.
 
-## Remaining
-- Confirm the expected-pathway and care-bundle definitions with the mentor.
-- Build and run the Docker image.
-- Final project report and presentation.
+## Week 3: Reporting and final deliverables (3 to 10 November 2026, in progress)
+- Added this weekly progress log to the documentation.
+- Planned: project report, final presentation, mentor confirmation of the expected-pathway and care-bundle definitions, and the Docker build check.
