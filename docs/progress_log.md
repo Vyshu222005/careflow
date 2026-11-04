@@ -26,4 +26,5 @@ Weekly summary of the work on CareFlow: Clinical Pathway Process Mining. Dates a
 
 ## Week 3: Reporting and final deliverables (3 to 10 November 2026, in progress)
 - Added this weekly progress log to the documentation.
+- Started the project report: introduction, problem statement, objective and dataset sections (docs/project_report.md).
 - Planned: project report, final presentation, mentor confirmation of the expected-pathway and care-bundle definitions, and the Docker build check.
