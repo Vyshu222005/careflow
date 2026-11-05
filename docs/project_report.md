@@ -44,10 +44,68 @@ Patient counts do not change when rare steps are left out. The full detail is in
 - 26% of patients have no discharge event, and the reason is not in the data.
 
 ## 5. Method
-To be completed: tools, event-log preparation, pathway discovery, waiting-time analysis, conformance checking, rework and handover analysis, care bundle, and the prediction model.
+### 5.1 Tools
+Python, pandas and NumPy for data handling; pm4py for process mining, with Graphviz for the process maps; scikit-learn, XGBoost and SHAP for the prediction model; Streamlit and Plotly for the dashboard; ReportLab and Matplotlib for the PDF report; pytest, Git, GitHub Actions and Docker for quality and delivery.
+
+### 5.2 Steps
+| Step | What was done | Code |
+|---|---|---|
+| Collect and clean | Downloaded the log, removed duplicates and patients with events before registration, validated every change | `src/download_data.py`, `src/clean_data.py` |
+| Prepare the event log | Ordered events, added case-level features such as duration and waiting times | `src/prepare_log.py` |
+| Pathways | Grouped patients by the sequence of steps. Repeated lab tests are left out at the "clinical step" level | `src/variants.py` |
+| Process discovery | Discovered process models (directly-follows graph, heuristics net, inductive miner) | `src/discovery.py` |
+| Bottlenecks | Median and 90th-percentile waits between consecutive steps, time to antibiotics, monthly trends | `src/bottlenecks.py` |
+| Conformance | Compared each patient with an expected sepsis pathway and scored fitness (1.0 is an exact match) | `src/conformance.py` |
+| Rework | Repeated steps, loop-backs and returns to the ER | `src/rework.py` |
+| Care bundle | Checked the recommended sepsis steps on time, with monthly control charts | `src/bundle.py` |
+| Handovers | Moves between departments, with department roles inferred from the steps they record | `src/handover.py` |
+| Prediction | Predicted whether antibiotics come more than one hour after registration | `src/delay_features.py`, `src/delay_model.py`, `src/explain.py` |
+| Dashboard | Ten pages in four groups, with patient filters | `app.py`, `dashboard/` |
+
+### 5.3 Prediction model
+- **Question:** will a patient's first antibiotics be given more than 1 hour after ER registration? Only patients with antibiotics recorded can be modelled.
+- **Leakage control:** a model may use only information available at its prediction point (ER registration, or completion of sepsis triage). Antibiotic information, the diagnosis code and test-order flags are never used, and a guard in the code fails if a forbidden column reaches a model.
+- **Models:** logistic regression, random forest and XGBoost, with class weights for the imbalance.
+- **Validation:** 5-fold stratified cross-validation over patients, an 80/20 hold-out and a temporal check, compared with the baseline of always predicting a delay. Metrics: precision, recall, F1, ROC-AUC and PR-AUC.
+
+### 5.4 Quality assurance
+87 automated tests (including checks of every dashboard page and filter), input validation that reconciles event counts, and GitHub Actions that run the tests on every push.
 
 ## 6. Results
-To be completed: pathways, bottlenecks, conformance, rework and returns, department flow, model evaluation.
+### 6.1 Overview
+| Measure | Result |
+|---|---|
+| Patients / cleaned events | 995 / 14,214 |
+| Median case duration | 5.2 days |
+| Reach intensive care | 10% |
+| Median time from registration to first antibiotics | 2.0 hours |
+| Patients with no antibiotics recorded | 22% (219 patients) |
+
+### 6.2 Pathways
+There are **96 distinct clinical pathways**. The top 10 cover 73% of patients, and 4% follow a route nobody else follows. The most common pathway (Registration, Triage, Sepsis triage, IV fluid, Antibiotics, Ward, Release A) is followed by 22.5% of patients (224).
+
+### 6.3 Bottlenecks
+776 patients received antibiotics. **33% were treated within 1 hour and 72% within 3 hours.** Registration to triage is fast (median 8 minutes), sepsis triage follows at 11 minutes and IV fluid at 59 minutes, but antibiotics come at a median of 2.0 hours. The month-by-month median delay rises from under one hour in early 2014 to about 2.5 hours in early 2015; months with few patients move a lot, so the trend is read with caution.
+
+### 6.4 Conformance and care bundle
+About **33%** of patients follow the expected pathway exactly (average fitness 0.90). The most frequent deviation is antibiotics later than 1 hour after registration (about half of patients). Only **18%** complete the full care bundle on time.
+
+### 6.5 Rework, returns and department flow
+| Measure | Result |
+|---|---|
+| Patients with rework (a repeated step) | 30% (300) |
+| Patients with repeated ward records | 294 (356 extra records) |
+| Loop-backs to an earlier step | 38 patients |
+| Discharged patients who return to the ER | 278 of 739 (28% of all 995 patients); median 46.5 days after discharge |
+| Returns by day 7 / 30 / 90 | 16% / 40% / 66% |
+| Departments / handovers | 26 (20 ward units) / 6,642 |
+| Repeated ward records that move to a different unit | 89% (317 of 356), so they look like transfers |
+
+### 6.6 Prediction model
+- **At ER registration** the models have **no skill**: cross-validated ROC-AUC is 0.48 to 0.50, no better than chance.
+- **At completion of sepsis triage** the signal is **weak**. The best model (XGBoost, 775 patients modelled) reaches a cross-validated ROC-AUC of 0.58 (0.50 is chance) and a PR-AUC of 0.74 against 0.67 for always predicting a delay.
+- The full tables, the hold-out and temporal checks, and the risk-group analysis are in `docs/model_evaluation.md`.
+- The honest conclusion is that early information does not predict antibiotic delay reliably. The model is a research demonstration, not a clinical tool.
 
 ## 7. Conclusion and future work
 To be completed.
