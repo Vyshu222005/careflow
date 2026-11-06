@@ -108,7 +108,29 @@ About **33%** of patients follow the expected pathway exactly (average fitness 0
 - The honest conclusion is that early information does not predict antibiotic delay reliably. The model is a research demonstration, not a clinical tool.
 
 ## 7. Conclusion and future work
-To be completed.
+### 7.1 Conclusion
+Process mining on the sepsis event log shows how care actually runs in the emergency room, and where it falls short of the one-hour antibiotic recommendation.
+
+- **Treatment is slower than recommended.** Only 33% of treated patients receive antibiotics within 1 hour of registration (72% within 3 hours), and the median wait is 2.0 hours. The early steps are fast, so the delay sits between sepsis triage and antibiotics.
+- **Care varies.** Patients take 96 distinct pathways, only about 33% follow the expected pathway exactly, and only 18% complete the full care bundle.
+- **Repeated steps and returns are common.** 30% of patients repeat a step, and 278 of 739 discharged patients return to the emergency room, a median of 46.5 days later. Most repeated ward records are transfers between units.
+- **The delay is hard to predict.** With information available at registration the models have no skill, and at completion of sepsis triage the signal is weak (cross-validated ROC-AUC 0.58). This is reported as it is, and the model is a research demonstration, not a clinical tool.
+
+The findings are delivered in an interactive dashboard (ten pages in four groups, with patient filters), a PDF report, 87 automated tests and continuous integration. All numbers come from one public dataset and are measured from ER registration, so they describe this log and are not clinical advice.
+
+### 7.2 Limitations
+- One hospital, public data, timestamps entered retrospectively.
+- The antibiotic clock starts at registration because the log has no time of sepsis recognition, so the true share treated in time is probably higher.
+- The expected pathway and the care bundle are adapted for this project and are not official clinical measures.
+- Department and discharge codes are anonymised, so department roles are inferred.
+- The prediction model has little skill, so it should not be used to support decisions.
+
+### 7.3 Future work
+- Confirm the expected pathway and the care-bundle definitions with a clinical expert.
+- Test the approach on other event logs, and on logs that record the time of sepsis recognition.
+- Add richer information to the prediction model, such as clinical measurements at triage, and re-evaluate it.
+- Monitor the delay over time with the control charts as new data arrives.
+- Build and run the Docker image so the dashboard can be deployed on any machine.
 
 ## References
 - Mannhardt, F. (2016). *Sepsis Cases - Event Log.* 4TU.ResearchData.
